@@ -18,13 +18,13 @@ export const createMockContent = (id, title) => ({
       {
         id: `${id}-v1`,
         title: `Introduction to ${title}`,
-        url: "https://www.youtube.com/embed/EerdGm-ehJQ",
+        url: "https://youtu.be/GxmfcnU3feo?si=ZqtdVAqTU540_MQD",
         description: "Core concepts and overview.",
       },
       {
         id: `${id}-v2`,
         title: `Practical Application`,
-        url: "https://www.youtube.com/embed/SccSCuHhbcM",
+        url: "https://youtu.be/8sXRyHI3bLw?si=ZGJ5AMVQHOiDiofa",
         description: "Hands-on walk-through.",
       },
     ],
