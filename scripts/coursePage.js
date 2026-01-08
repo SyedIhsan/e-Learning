@@ -50,9 +50,9 @@ const renderCoursePage = (level) => {
 
         <div class="lg:w-3/5 p-8 lg:p-12 flex flex-col justify-between">
           <div>
-            <div class="flex items-start justify-between mb-4">
-              <h2 class="text-3xl font-black text-slate-900 leading-tight">${escapeHtml(course.title)}</h2>
-              <div class="text-2xl font-black text-yellow-500">${escapeHtml(course.price)}</div>
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between sm:gap-4 mb-4">
+              <h2 class="text-3xl font-black text-slate-900 leading-tight flex-1">{{escapeHtml(course.title)}}</h2>
+              <div class="text-2xl font-black text-yellow-500 mt-2 sm:mt-0">RM ${escapeHtml(course.price)}</div>
             </div>
             <p class="text-slate-500 text-lg mb-8 leading-relaxed max-w-xl">${escapeHtml(course.description)}</p>
 
@@ -79,7 +79,7 @@ const renderCoursePage = (level) => {
           </div>
 
           <div class="flex flex-col sm:flex-row items-stretch gap-4">
-            <a href="#/course/${escapeHtml(course.id)}" class="flex-1 h-16 bg-yellow-50 text-yellow-700 rounded-2xl font-black text-lg hover:bg-yellow-500 hover:text-white transition-all duration-300 flex items-center justify-center space-x-2 group/details">
+            <a href="#/course/${escapeHtml(course.id)}" class="flex-1 py-4 sm:h-16 bg-yellow-50 text-yellow-700 rounded-2xl font-black text-lg hover:bg-yellow-500 hover:text-white transition-all duration-300 flex items-center justify-center space-x-2 group/details">
               <span class="relative">View Details</span>
               <svg class="w-5 h-5 transition-transform duration-300 group-hover/details:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -89,7 +89,7 @@ const renderCoursePage = (level) => {
             ${
               isCurrentSuccess
                 ? `
-            <div class="flex-[1.5] h-16 bg-emerald-50 border border-emerald-100 px-6 rounded-2xl flex items-center justify-between">
+            <div class="flex-[1.5] py-4 sm:h-16 bg-emerald-50 border border-emerald-100 px-6 rounded-2xl flex items-center justify-between">
               <div class="flex items-center space-x-3">
                 <div class="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
                   <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,7 +105,7 @@ const renderCoursePage = (level) => {
             `
                 : isOwned
                 ? `
-            <a href="#/dashboard" class="flex-[1.5] h-16 flex items-center justify-center space-x-3 bg-slate-900 text-white rounded-2xl font-black text-lg hover:bg-slate-800 transition-all group shadow-xl">
+            <a href="#/dashboard" class="flex-[1.5] py-4 sm:h-16 flex items-center justify-center space-x-3 bg-slate-900 text-white rounded-2xl font-black text-lg hover:bg-slate-800 transition-all group shadow-xl">
               <span>Access Product</span>
               <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M17 8l4 4m0 0l-4 4m4-4H3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -115,7 +115,7 @@ const renderCoursePage = (level) => {
                 : `
             <button data-action="course-buy" data-course-id="${escapeHtml(course.id)}" ${
               buyingId !== null ? "disabled" : ""
-            } class="flex-[1.5] h-16 rounded-2xl font-black text-lg shadow-xl transition-all flex items-center justify-center space-x-3 ${
+            } class="flex-[1.5] py-4 sm:h-16 rounded-2xl font-black text-lg shadow-xl transition-all flex items-center justify-center space-x-3 ${
               buyingId === course.id
                 ? "bg-yellow-400 text-white cursor-wait"
                 : "bg-yellow-500 text-white hover:bg-yellow-600 hover:shadow-yellow-200/50 hover:scale-[1.02] active:scale-95 shadow-yellow-100"
@@ -129,7 +129,7 @@ const renderCoursePage = (level) => {
                 </svg>
                 <span>Securing...</span>
               `
-                  : `<span>Enroll - ${escapeHtml(course.price)}</span>`
+                  : `<span>Enroll - RM ${escapeHtml(course.price)}</span>`
               }
             </button>
             `
