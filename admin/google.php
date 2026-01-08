@@ -14,7 +14,7 @@ function ui_msg(string $msg): array {
   return match ($msg) {
     "connected" => ["ok", "Connected! Refresh token saved."],
     "connected_already" => ["ok", "Already connected (token exists)."],
-    "no_refresh" => ["warn", "Google tak bagi refresh_token. Tekan Connect lagi. Kalau masih sama, Disconnect dan connect semula."],
+    "no_refresh" => ["warn", "Google does not provide refresh_token. Click Connect again. If still the same, Disconnect and reconnect."],
     "bad_state" => ["err", "State mismatch (security). Try connect again."],
     "missing_code" => ["err", "Missing code. Try connect again."],
     "failed" => ["err", "OAuth failed. Check Client ID/Secret/Redirect URI."],
@@ -30,7 +30,7 @@ function ui_msg(string $msg): array {
   <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
     <div>
       <h1 class="text-4xl font-black mb-2">Google Drive Connection</h1>
-      <p class="text-slate-500">Connect akaun Google company sekali je untuk automation workbook.</p>
+      <p class="text-slate-500">Connect your company Google account once for workbook automation.</p>
     </div>
   </div>
 
@@ -51,7 +51,7 @@ function ui_msg(string $msg): array {
           <p class="text-slate-500 mt-2">Refresh token stored in DB: <span class="font-bold">google_oauth_tokens</span></p>
         <?php else: ?>
           <div class="text-2xl font-black text-red-600">NOT CONNECTED</div>
-          <p class="text-slate-500 mt-2">Tekan connect dan login guna akaun Google company.</p>
+          <p class="text-slate-500 mt-2">Click connect and login using your company Google account.</p>
         <?php endif; ?>
       </div>
 
