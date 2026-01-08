@@ -133,7 +133,7 @@ const renderCourseDetail = (courseId) => {
                   <span class="text-sm font-black text-slate-400 uppercase tracking-widest">Enrollment Fee</span>
                   <span class="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-black rounded-full">ONE-TIME ACCESS</span>
                 </div>
-                <div class="text-5xl font-black text-slate-900 mb-2">${escapeHtml(course.price)}</div>
+                <div class="text-5xl font-black text-slate-900 mb-2">RM ${escapeHtml(course.price)}</div>
                 <p class="text-slate-500 text-sm font-medium mb-10">Instant digital delivery. Lifetime platform access.</p>
 
                 <div class="space-y-4 mb-10">
@@ -176,7 +176,7 @@ const renderCourseDetail = (courseId) => {
                     : `
                 <button data-action="detail-buy" data-course-id="${escapeHtml(course.id)}" ${
                   buying ? "disabled" : ""
-                } class="w-full py-5 rounded-2xl font-black text-xl shadow-2xl transition-all flex items-center justify-center space-x-3 ${
+                } class="w-full py-6 md:py-5 rounded-2xl font-black text-xl shadow-2xl transition-all flex items-center justify-center space-x-3 ${
                   buying
                     ? "bg-yellow-400 text-white cursor-wait"
                     : "bg-yellow-500 text-white hover:bg-yellow-600 hover:scale-105 shadow-yellow-200"
