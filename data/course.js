@@ -130,6 +130,7 @@ export const COURSES_DATA = [
     },
 
     // ADVANCED
+    /*
     {
       id: "adv-301",
       level: CourseLevel.ADVANCED,
@@ -170,6 +171,7 @@ export const COURSES_DATA = [
         "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800",
       content: createMockContent("adv-303", "Cybersecurity"),
     },
+    */
   ];
 
 export const COURSES = COURSES_DATA.reduce((acc, course) => {
