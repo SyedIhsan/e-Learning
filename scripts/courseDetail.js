@@ -133,7 +133,7 @@ const renderCourseDetail = (courseId) => {
                   <span class="text-sm font-black text-slate-400 uppercase tracking-widest">Enrollment Fee</span>
                   <span class="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-black rounded-full">ONE-TIME ACCESS</span>
                 </div>
-                <div class="text-5xl font-black text-slate-900 mb-2">RM ${escapeHtml(course.price)}</div>
+                <div class="text-5xl font-black text-slate-900 mb-2">RM${escapeHtml(course.price)}</div>
                 <p class="text-slate-500 text-sm font-medium mb-10">Instant digital delivery. Lifetime platform access.</p>
 
                 <div class="space-y-4 mb-10">
