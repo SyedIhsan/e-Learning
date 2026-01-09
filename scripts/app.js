@@ -119,6 +119,40 @@ const WORKBOOK_API_URL = new URL("../api/ensure_workbook.php", import.meta.url).
   // -----------------------------
   // Event delegation (click, submit, input, contextmenu)
   // -----------------------------
+  document.addEventListener("submit", (e) => {
+    const form = e.target?.closest?.('form[data-action="waitlist-form"]');
+    if (!form) return;
+   
+    e.preventDefault();
+   
+    // trigger native validation (required email)
+    if (typeof form.reportValidity === "function" && !form.reportValidity()) return;
+   
+    const level = form.getAttribute("data-level") || "";
+    if (!STATE.coursePage) STATE.coursePage = {};
+   
+    // sync state ikut level
+    if (STATE.coursePage.waitlistLevel !== level) {
+      STATE.coursePage.waitlistLevel = level;
+      STATE.coursePage.waitlist = { isNotifying: false, isNotified: false };
+    }
+    if (!STATE.coursePage.waitlist) {
+      STATE.coursePage.waitlist = { isNotifying: false, isNotified: false };
+    }
+   
+    const wl = STATE.coursePage.waitlist;
+    if (wl.isNotifying || wl.isNotified) return;
+   
+    wl.isNotifying = true;
+    render(); // guna render() existing kau
+   
+    setTimeout(() => {
+      wl.isNotifying = false;
+      wl.isNotified = true;
+      render();
+    }, 1500);
+  });
+
   document.addEventListener(
     "pointerover",
     (e) => {
