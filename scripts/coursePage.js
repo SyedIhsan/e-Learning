@@ -52,7 +52,7 @@ const renderCoursePage = (level) => {
           <div>
             <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between sm:gap-4 mb-4">
               <h2 class="text-3xl font-black text-slate-900 leading-tight flex-1">${escapeHtml(course.title)}</h2>
-              <div class="text-2xl font-black text-yellow-500 mt-2 sm:mt-0">RM${escapeHtml(course.price)}</div>
+              <div class="text-2xl font-black text-yellow-500 mt-2 sm:mt-0">${escapeHtml(course.price)}</div>
             </div>
             <p class="text-slate-500 text-lg mb-8 leading-relaxed max-w-xl">${escapeHtml(course.description)}</p>
 
@@ -129,7 +129,7 @@ const renderCoursePage = (level) => {
                 </svg>
                 <span>Securing...</span>
               `
-                  : `<span>Enroll - RM${escapeHtml(course.price)}</span>`
+                  : `<span>Enroll - ${escapeHtml(course.price)}</span>`
               }
             </button>
             `
