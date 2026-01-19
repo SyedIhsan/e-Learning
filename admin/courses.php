@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 require __DIR__ . "/auth.php";
+require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/waitlist_notify_lib.php';
 
 $level = $_GET["level"] ?? "All";
 $q = trim((string)($_GET["q"] ?? ""));
@@ -34,6 +36,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "creat
     try {
       $stmt->execute();
       $success = "Course created.";
+
+      // queue email notification (guna course id yang admin isi, contoh beg-101)
+      $courseKey = $id;                       // "beg-101"
+      $levelKey  = strtolower(trim($lvl));    // "beginner" / "intermediate" / "advanced"
+      $courseUrl = "https://sdc.cx/e-Learning/#/course/" . rawurlencode($courseKey);
+
+      queue_course_notification($conn, $levelKey, $courseKey, $title, $courseUrl);
+
     } catch (Throwable $e) {
       $errors[] = "Failed to create. Maybe duplicate course id?";
     }
@@ -83,7 +93,7 @@ include __DIR__ . "/partials/nav.php";
   <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
     <div>
       <h1 class="text-4xl font-black mb-2">Courses</h1>
-      <p class="text-slate-500">Add / edit courses. Course ID ikut format macam <span class="font-bold">beg-101</span>.</p>
+      <p class="text-slate-500">Add / edit courses. Course ID should follow a format like <span class="font-bold">beg-101</span>.</p>
     </div>
     <a href="contents.php" class="px-6 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-2xl hover:bg-slate-50 transition">Manage Content →</a>
   </div>
@@ -152,7 +162,6 @@ include __DIR__ . "/partials/nav.php";
           <div>
             <label class="block text-sm font-bold text-slate-700 mb-2">Image URL</label>
             <input name="image" placeholder="https://images.unsplash.com/..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
-            <p class="text-xs text-slate-400 mt-2">Tip: guna URL (paling senang) supaya ikut pattern e-Learning.</p>
           </div>
 
           <button class="w-full py-4 bg-yellow-500 text-white font-bold rounded-2xl hover:bg-yellow-600 shadow-lg shadow-yellow-100 transition active:scale-95">
@@ -203,7 +212,7 @@ include __DIR__ . "/partials/nav.php";
                     <h3 class="text-2xl font-black text-slate-900"><?= e($c["title"]) ?></h3>
                     <p class="text-slate-500 mt-2 line-clamp-2"><?= e($c["description"]) ?></p>
                   </div>
-                  <div class="text-2xl font-black text-yellow-500"><?= e($c["price"]) ?></div>
+                  <div class="text-2xl font-black text-yellow-500">RM<?= e($c["price"]) ?></div>
                 </div>
 
                 <div class="flex flex-wrap gap-3">

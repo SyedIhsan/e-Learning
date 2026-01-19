@@ -1,79 +1,153 @@
-import { getPath, resetPageStatesOnRoute, navigate } from "./helpers.js";
+// route.js
 import STATE from "./state.js";
+import renderNavbar from "./Navbar.js";
+import renderFooter from "./footer.js";
+
 import renderHome from "./home.js";
 import renderCoursePage from "./coursePage.js";
 import renderCourseDetail from "./courseDetail.js";
-import renderSignIn from "./signIn.js";
-import renderDashboard from "./dashboard.js";
 import renderCourseContent from "./courseContent.js";
-import renderNavbar from "./Navbar.js";
-import renderFooter from "./footer.js";
-import { $app } from "./helpers.js";
+import renderDashboard from "./dashboard.js";
+import renderSignIn from "./signIn.js";
 import renderCheckout from "./checkout.js";
+import renderForgotPassword from "./forgotPassword.js";
+import renderChangePassword from "./changePassword.js";
 
-const renderRoute = (path) => {
-    const user = STATE.user;
+import { resetPageStatesOnRoute } from "./helpers.js";
 
-    if (path === "/") return renderHome();
-    if (path === "/beginner") return renderCoursePage("beginner");
-    if (path === "/intermediate") return renderCoursePage("intermediate");
-    if (path === "/advanced") return renderCoursePage("advanced");
+const $app = () => document.getElementById("app");
 
-    if (path.startsWith("/course/")) {
-      const id = path.split("/")[2] || "";
-      return renderCourseDetail(id);
-    }
+const cssEscape = (v) => {
+  try {
+    return CSS.escape(String(v));
+  } catch {
+    return String(v).replace(/"/g, '\\"');
+  }
+};
 
-    if (path.startsWith("/checkout/")) {
-      const id = path.split("/")[2] || "";
-      return renderCheckout(id);
-    }
+const captureActiveField = () => {
+  const el = document.activeElement;
+  if (!el) return null;
 
-    if (path === "/signin") return renderSignIn();
+  const tag = (el.tagName || "").toLowerCase();
+  if (tag !== "input" && tag !== "textarea") return null;
 
-    // Protected routes
-    if (path === "/dashboard") {
-      if (!user) {
-        navigate("/signin");
-        return "";
-      }
-      return renderDashboard();
-    }
+  const name = el.getAttribute("name");
+  const field = el.getAttribute("data-field");
+  const id = el.getAttribute("id");
 
-    if (path.startsWith("/course-content/")) {
-      if (!user) {
-        navigate("/signin");
-        return "";
-      }
-      const id = path.split("/")[2] || "";
-      return renderCourseContent(id);
-    }
+  const key = name ? `name:${name}` : field ? `field:${field}` : id ? `id:${id}` : null;
+  if (!key) return null;
 
-    // Not Found
-    return `
-<div class="min-h-screen flex items-center justify-center p-8">
-  <div class="text-center">
-    <h1 class="text-3xl font-black text-slate-900 mb-4">Page Not Found</h1>
-    <a href="#/" class="text-yellow-500 font-bold hover:underline">Return to Home</a>
-  </div>
-</div>`;
+  return {
+    key,
+    start: typeof el.selectionStart === "number" ? el.selectionStart : null,
+    end: typeof el.selectionEnd === "number" ? el.selectionEnd : null,
   };
+};
+
+const restoreActiveField = (meta) => {
+  if (!meta?.key) return;
+
+  requestAnimationFrame(() => {
+    let selector = "";
+
+    if (meta.key.startsWith("name:")) {
+      const v = meta.key.slice(5);
+      selector = `input[name="${cssEscape(v)}"], textarea[name="${cssEscape(v)}"]`;
+    } else if (meta.key.startsWith("field:")) {
+      const v = meta.key.slice(6);
+      selector = `input[data-field="${cssEscape(v)}"], textarea[data-field="${cssEscape(v)}"]`;
+    } else if (meta.key.startsWith("id:")) {
+      const v = meta.key.slice(3);
+      selector = `#${cssEscape(v)}`;
+    }
+
+    const el = document.querySelector(selector);
+    if (!el) return;
+
+    el.focus({ preventScroll: true });
+    if (typeof meta.start === "number" && typeof meta.end === "number" && el.setSelectionRange) {
+      try {
+        el.setSelectionRange(meta.start, meta.end);
+      } catch {}
+    }
+  });
+};
+
+export const getPath = () => {
+  const hash = window.location.hash || "#/";
+  return hash.replace(/^#/, "") || "/";
+};
+
+export const renderRoute = (path) => {
+  // Home
+  if (path === "/" || path === "") return renderHome();
+
+  // Course listing by level
+  if (path === "/beginner") return renderCoursePage("beginner");
+  if (path === "/intermediate") return renderCoursePage("intermediate");
+  if (path === "/advanced") return renderCoursePage("advanced");
+
+  // Course detail
+  if (path.startsWith("/course/")) {
+    const courseId = decodeURIComponent(path.replace("/course/", ""));
+    return renderCourseDetail(courseId);
+  }
+
+  // Course content (this MUST match your dashboard links)
+  if (path.startsWith("/course-content/")) {
+    const courseId = decodeURIComponent(path.replace("/course-content/", ""));
+    return renderCourseContent(courseId);
+  }
+
+  // Dashboard
+  if (path === "/dashboard") return renderDashboard();
+
+  // Auth
+  if (path === "/signin") return renderSignIn();
+  if (path === "/forgot-password") return renderForgotPassword();
+  if (path === "/change-password") return renderChangePassword();
+
+  // Checkout
+  if (path.startsWith("/checkout/")) {
+    const courseId = decodeURIComponent(path.replace("/checkout/", ""));
+    return renderCheckout(courseId);
+  }
+
+  // 404
+  return `
+    <div class="max-w-3xl mx-auto px-4 py-16">
+      <div class="bg-white rounded-2xl border border-slate-200 p-8">
+        <h1 class="text-2xl font-extrabold text-slate-900">Page not found</h1>
+        <p class="mt-2 text-slate-600">Route: <code class="text-slate-900">${path}</code></p>
+        <a class="inline-flex mt-6 px-4 py-2 rounded-xl bg-amber-500 text-slate-900 font-bold" href="#/">
+          Back to Home
+        </a>
+      </div>
+    </div>
+  `;
+};
 
 export const render = () => {
-    const path = getPath();
-    resetPageStatesOnRoute(path);
+  const app = $app();
+  if (!app) return;
 
-    const html = `
-<div class="flex flex-col min-h-screen">
-  ${renderNavbar()}
-  <main class="flex-grow">
-    ${renderRoute(path)}
-  </main>
-  ${renderFooter()}
-</div>
-`;
-    $app().innerHTML = html;
-    STATE.prevPath = path;
-  };
+  const active = captureActiveField();
 
-export default renderRoute;
+  const path = getPath();
+  resetPageStatesOnRoute(path);
+
+  const pageHtml = renderRoute(path);
+
+  // IMPORTANT: Navbar + Footer injected here
+  app.innerHTML = `
+    ${renderNavbar()}
+    <main class="min-h-[calc(100vh-120px)] bg-slate-50">
+      ${pageHtml}
+    </main>
+    ${renderFooter()}
+  `;
+
+  restoreActiveField(active);
+};

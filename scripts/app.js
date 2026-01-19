@@ -15,6 +15,7 @@ import {
 } from "./helpers.js";
 
 const WORKBOOK_API_URL = new URL("../api/ensure_workbook.php", import.meta.url).toString();
+const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toString();
 
 (async function () {
   "use strict";
@@ -48,6 +49,20 @@ const WORKBOOK_API_URL = new URL("../api/ensure_workbook.php", import.meta.url).
     document.body.style.width = "";
 
     window.scrollTo(0, y);
+  }
+
+  function wrapEbookTablesForScroll() {
+    const root = document.getElementById("ebook-html");
+    if (!root) return;
+
+    root.querySelectorAll("table").forEach((tbl) => {
+      if (tbl.closest(".table-scroll")) return;
+
+      const wrap = document.createElement("div");
+      wrap.className = "table-scroll";
+      tbl.parentNode.insertBefore(wrap, tbl);
+      wrap.appendChild(tbl);
+    });
   }
 
   // Workbook: create/reuse per-user Google Sheet on demand (when Workbook tab clicked)
@@ -116,12 +131,137 @@ const WORKBOOK_API_URL = new URL("../api/ensure_workbook.php", import.meta.url).
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  let __pendingEbookTop = false;
+
+  const forceEbookTop = () => {
+    const scroller = document.getElementById("ebook-scroll");
+    if (scroller) {
+      scroller.scrollTop = 0;
+      scroller.scrollTo({ top: 0, behavior: "auto" });
+    }
+    window.scrollTo({ top: 0, behavior: "auto" });
+  };
+
+  const goNextEbook = (currentId) => {
+    const cc = STATE.courseContent;
+    const course = COURSES[cc.courseId];
+    const ebooks = course?.content?.ebooks || [];
+    if (!ebooks.length) return false;
+
+    const idx = ebooks.findIndex((e) => e.id === currentId);
+    if (idx === -1) return false;
+
+    const next = ebooks[idx + 1];
+    if (!next) return false;
+
+    cc.activeTab = "ebook";
+    cc.selectedEbookId = next.id;
+    return true;
+  };
+
   // -----------------------------
   // Event delegation (click, submit, input, contextmenu)
   // -----------------------------
+  document.addEventListener("submit", async (e) => {
+    const form = e.target?.closest?.('form[data-action="footer-subscribe-form"]');
+    if (!form) return;
+
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if (typeof form.reportValidity === "function" && !form.reportValidity()) return;
+
+    const input = form.querySelector('input[type="email"]');
+    const btn = form.querySelector('button[type="submit"]');
+    const msg = form.querySelector('[data-role="footer-subscribe-msg"]');
+
+    const email = (input?.value || "").trim();
+    if (!email) return;
+
+    const levels = ["beginner", "intermediate", "advanced"];
+
+    const setMsg = (text, ok = true) => {
+      if (!msg) return;
+      msg.classList.remove("hidden");
+      msg.textContent = text;
+      msg.className = `text-xs text-center ${ok ? "text-emerald-300" : "text-rose-300"}`;
+    };
+
+    try {
+      if (btn) { btn.disabled = true; btn.textContent = "SUBSCRIBING..."; }
+      if (input) input.disabled = true;
+
+      await Promise.all(
+        levels.map(async (level) => {
+          const res = await fetch("/e-Learning/api/waitlist_subscribe.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, level }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) throw new Error(data.error || `Subscribe failed (${level})`);
+        })
+      );
+
+      setMsg("Subscribed! You’ll get notified for any new course.", true);
+      if (input) input.value = "";
+    } catch (err) {
+      setMsg(err?.message || "Something went wrong. Try again.", false);
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = "SUBSCRIBE NOW"; }
+      if (input) input.disabled = false;
+    }
+  });
+
+  document.addEventListener("submit", async (e) => {
+    const form = e.target?.closest?.('form[data-action="waitlist-form"]');
+    if (!form) return;
+
+    e.preventDefault();
+    if (typeof form.reportValidity === "function" && !form.reportValidity()) return;
+
+    const level = form.getAttribute("data-level") || "";
+    const email = (form.querySelector('input[type="email"]')?.value || "").trim();
+
+    if (!STATE.coursePage) STATE.coursePage = {};
+    if (STATE.coursePage.waitlistLevel !== level) {
+      STATE.coursePage.waitlistLevel = level;
+      STATE.coursePage.waitlist = { isNotifying: false, isNotified: false, error: "" };
+    }
+    if (!STATE.coursePage.waitlist) STATE.coursePage.waitlist = { isNotifying:false, isNotified:false, error:"" };
+
+    const wl = STATE.coursePage.waitlist;
+    if (wl.isNotifying || wl.isNotified) return;
+
+    wl.isNotifying = true;
+    wl.error = "";
+    render();
+
+    try {
+      const res = await fetch("/e-Learning/api/waitlist_subscribe.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, level }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || "Request failed");
+
+      wl.isNotifying = false;
+      wl.isNotified = true;
+      render();
+    } catch (err) {
+      wl.isNotifying = false;
+      wl.error = err?.message || "Something went wrong";
+      render();
+    }
+  });
+
+  const canHoverFinePointer = () =>
+    window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
   document.addEventListener(
     "pointerover",
     (e) => {
+      if (!canHoverFinePointer()) return; // ✅ desktop mouse sahaja
       const iframe = e.target?.closest?.('iframe[data-scroll-lock="worksheet"]');
       if (iframe) lockBodyScroll();
     },
@@ -131,6 +271,7 @@ const WORKBOOK_API_URL = new URL("../api/ensure_workbook.php", import.meta.url).
   document.addEventListener(
     "pointerout",
     (e) => {
+      if (!canHoverFinePointer()) return; // ✅ desktop mouse sahaja
       const iframe = e.target?.closest?.('iframe[data-scroll-lock="worksheet"]');
       if (iframe) unlockBodyScroll();
     },
@@ -234,6 +375,7 @@ const WORKBOOK_API_URL = new URL("../api/ensure_workbook.php", import.meta.url).
       const cc = STATE.courseContent;
       const wasDone = (cc.completion?.[type] || []).includes(id);
       const isCurrentVideo = type === "videos" && cc.activeTab === "video" && cc.selectedVideoId === id;
+      const isCurrentEbook = type === "ebooks" && cc.activeTab === "ebook" && cc.selectedEbookId === id;
 
       toggleCompletion(type, id);
 
@@ -242,14 +384,53 @@ const WORKBOOK_API_URL = new URL("../api/ensure_workbook.php", import.meta.url).
         goNextVideo(id);
       }
 
+      // ebook: bila baru tekan "I've Finished Reading"
+      if (isCurrentEbook && !wasDone) {
+        // stop browser “keep focus at bottom”
+        document.activeElement?.blur?.();
+
+        // cuba pergi next ebook kalau ada
+        goNextEbook(id);
+
+        // apa pun, paksa scroll top lepas render
+        __pendingEbookTop = true;
+
+        // optional: paksa top sebelum render juga (lagi cepat rasa dia)
+        forceEbookTop();
+      }
+
+      render();
+      return;
+    }
+
+    if (action === "forgot-back") {
+      STATE.forgotPassword.stage = "request";
+      STATE.forgotPassword.code = "";
+      STATE.forgotPassword.newPassword = "";
+      STATE.forgotPassword.confirmPassword = "";
+      STATE.forgotPassword.error = "";
+      STATE.forgotPassword.message = "";
       render();
       return;
     }
   });
 
-  document.addEventListener("submit", (e) => {
-    const checkoutForm = e.target.closest('form[data-action="checkout-submit"]');
-    if (checkoutForm) {
+  // --- ONE submit handler only ---
+  document.addEventListener("submit", async (e) => {
+    const form = e.target.closest("form");
+    if (!form) return;
+
+    const action = form.getAttribute("data-action");
+    if (!action) return;
+
+    // endpoints (match your api/auth folder)
+    const AUTH_LOGIN_URL  = new URL("../api/auth/login.php", import.meta.url).toString();
+    const AUTH_FORGOT_URL = new URL("../api/auth/forgot_password.php", import.meta.url).toString();
+    const AUTH_RESET_URL  = new URL("../api/auth/reset_password.php", import.meta.url).toString();
+    const AUTH_CHANGE_URL = new URL("../api/auth/change_password.php", import.meta.url).toString();
+
+    // ===== Checkout submit =====
+    if (action === "checkout-submit") {
       e.preventDefault();
 
       const co = STATE.checkout;
@@ -267,54 +448,242 @@ const WORKBOOK_API_URL = new URL("../api/ensure_workbook.php", import.meta.url).
 
       if (!fullName || !email || !phoneNumber || !agreedTerms || co.processing) return;
 
+      const submitter = e.submitter || document.activeElement;
+
+      let payMode = "live";
+      if (submitter && submitter.getAttribute) {
+        const n = submitter.getAttribute("name");
+        if (n === "pay_mode") {
+          payMode = submitter.getAttribute("value") || submitter.value || "live";
+        }
+      }
+
       co.processing = true;
       render();
+       
+      const startUrl =
+        payMode === "sandbox"
+          ? `${START_PAYMENT_URL}${START_PAYMENT_URL.includes("?") ? "&" : "?"}sandbox=1`
+          : START_PAYMENT_URL;
+      
+      const f = document.createElement("form");
+      f.method = "POST";
+      f.action = startUrl;
 
-      setTimeout(() => {
-        const existingPurchased = getPurchasedList();
-        if (!existingPurchased.includes(courseId)) {
-          existingPurchased.push(courseId);
-          localStorage.setItem("sdc_purchased", JSON.stringify(existingPurchased));
-        }
+      const payload = { course_id: courseId, name: fullName, email, phone: phoneNumber };
+      for (const [k, v] of Object.entries(payload)) {
+        const i = document.createElement("input");
+        i.type = "hidden";
+        i.name = k;
+        i.value = v;
+        f.appendChild(i);
+      }
 
-        // TSX behavior: if not logged in, create temporary user session
-        if (!localStorage.getItem("sdc_user")) {
-          const rand = Math.floor(1000 + Math.random() * 9000);
-          handleLogin(`STUDENT-${rand}`, email);
-        } else {
-          localStorage.setItem("sdc_user_email", email);
-          loadUserFromStorage();
-        }
+      document.body.appendChild(f);
+      f.submit();
+      return;
+    }
 
-        if (STATE.user) STATE.user.purchasedCourses = existingPurchased;
+    // ===== Sign in =====
+    if (action === "signin-submit") {
+      e.preventDefault();
 
-        co.processing = false;
-        co.success = true;
+      const email = (STATE.signIn.email || "").trim();
+      const pw = (STATE.signIn.password || "").trim();
+
+      if (!email || !pw) {
+        STATE.signIn.error = "Please enter your email and password.";
         render();
-      }, 2500);
+        return;
+      }
+
+      try {
+        const resp = await fetch(AUTH_LOGIN_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password: pw }),
+        });
+
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok || !data?.ok) throw new Error(data?.error || "Login failed.");
+
+        const u = data.user || {};
+        localStorage.setItem("sdc_user", u.id || "");
+        localStorage.setItem("sdc_user_email", u.email || email);
+        localStorage.setItem("sdc_purchased", JSON.stringify(u.purchasedCourses || []));
+
+        STATE.user = {
+          id: u.id || "",
+          email: u.email || email,
+          purchasedCourses: u.purchasedCourses || [],
+          must_change_password: !!u.must_change_password,
+        };
+
+        if (STATE.user.must_change_password) navigate("/change-password");
+        else navigate("/dashboard");
+
+        render();
+      } catch (err) {
+        STATE.signIn.error = err?.message || "Login failed.";
+        render();
+      }
 
       return;
     }
 
-    const form = e.target.closest('form[data-action="signin-submit"]');
-    if (!form) return;
+    // ===== Forgot Password (request code) =====
+    if (action === "forgot-request") {
+      e.preventDefault();
 
-    e.preventDefault();
+      const email = (STATE.forgotPassword.email || "").trim().toLowerCase();
+      if (!email) {
+        STATE.forgotPassword.error = "Email is required.";
+        render();
+        return;
+      }
 
-    const id = (STATE.signIn.id || "").trim();
-    const email = (STATE.signIn.email || "").trim();
-    const pw = (STATE.signIn.password || "").trim();
-
-    if (!id || !email || !pw) {
-      STATE.signIn.error = "Please enter your Access ID, email and password.";
+      STATE.forgotPassword.loading = true;
+      STATE.forgotPassword.error = "";
+      STATE.forgotPassword.message = "";
       render();
+
+      try {
+        const res = await fetch(AUTH_FORGOT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.ok === false) {
+          throw new Error(data.error || "Failed to send verification code.");
+        }
+
+        STATE.forgotPassword.stage = "reset";
+        STATE.forgotPassword.message = "Verification code sent. Please check your email.";
+      } catch (err) {
+        STATE.forgotPassword.error = err?.message || "Request failed.";
+      } finally {
+        STATE.forgotPassword.loading = false;
+        render();
+      }
+
       return;
     }
 
-    // Simulate auth (same as TSX): any non-empty credentials pass
-    handleLogin(id, email);
-    navigate("/dashboard");
-    render();
+    // ===== Forgot Password (reset) =====
+    if (action === "forgot-reset") {
+      e.preventDefault();
+
+      const email = (STATE.forgotPassword.email || "").trim().toLowerCase();
+      const code = (STATE.forgotPassword.code || "").trim();
+      const p1 = STATE.forgotPassword.newPassword || "";
+      const p2 = STATE.forgotPassword.confirmPassword || "";
+
+      if (!email || !code || !p1 || !p2) {
+        STATE.forgotPassword.error = "All fields are required.";
+        render();
+        return;
+      }
+      if (p1 !== p2) {
+        STATE.forgotPassword.error = "Passwords do not match.";
+        render();
+        return;
+      }
+
+      STATE.forgotPassword.loading = true;
+      STATE.forgotPassword.error = "";
+      STATE.forgotPassword.message = "";
+      render();
+
+      try {
+        const res = await fetch(AUTH_RESET_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, code, new_password: p1 }),
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.ok === false) {
+          throw new Error(data.error || "Failed to reset password.");
+        }
+
+        STATE.forgotPassword.stage = "request";
+        STATE.forgotPassword.code = "";
+        STATE.forgotPassword.newPassword = "";
+        STATE.forgotPassword.confirmPassword = "";
+        STATE.forgotPassword.message = "Password updated. Please sign in.";
+        navigate("/signin");
+      } catch (err) {
+        STATE.forgotPassword.error = err?.message || "Reset failed.";
+      } finally {
+        STATE.forgotPassword.loading = false;
+        render();
+      }
+
+      return;
+    }
+
+    // ===== Change Password (first-login enforce) =====
+    if (action === "change-password-submit") {
+      e.preventDefault();
+
+      if (!STATE.user) {
+        navigate("/signin");
+        render();
+        return;
+      }
+
+      const email = (STATE.user.email || "").trim().toLowerCase();
+      const current = STATE.changePassword.currentPassword || "";
+      const p1 = STATE.changePassword.newPassword || "";
+      const p2 = STATE.changePassword.confirmPassword || "";
+
+      if (!current || !p1 || !p2) {
+        STATE.changePassword.error = "All fields are required.";
+        render();
+        return;
+      }
+      if (p1 !== p2) {
+        STATE.changePassword.error = "Passwords do not match.";
+        render();
+        return;
+      }
+
+      STATE.changePassword.loading = true;
+      STATE.changePassword.error = "";
+      STATE.changePassword.message = "";
+      render();
+
+      try {
+        const res = await fetch(AUTH_CHANGE_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, current_password: current, new_password: p1 }),
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.ok === false) {
+          throw new Error(data.error || "Failed to update password.");
+        }
+
+        STATE.user.must_change_password = false;
+
+        STATE.changePassword.currentPassword = "";
+        STATE.changePassword.newPassword = "";
+        STATE.changePassword.confirmPassword = "";
+        STATE.changePassword.message = "Password updated successfully.";
+
+        navigate("/dashboard");
+      } catch (err) {
+        STATE.changePassword.error = err?.message || "Update failed.";
+      } finally {
+        STATE.changePassword.loading = false;
+        render();
+      }
+
+      return;
+    }
   });
 
   document.addEventListener("input", (e) => {
@@ -346,24 +715,35 @@ const WORKBOOK_API_URL = new URL("../api/ensure_workbook.php", import.meta.url).
       return; // stop sini supaya tak jatuh ke sign-in handler
     }
 
-    // Sign-in controlled inputs (existing)
+    // Sign-in / Forgot / Change inputs
     const field = t.getAttribute("data-field");
     if (!field) return;
 
-    if (field === "signin-id") {
-      STATE.signIn.id = t.value;
-      if (STATE.signIn.error) STATE.signIn.error = "";
-    }
+    const value = t.type === "checkbox" ? t.checked : t.value;
 
     if (field === "signin-email") {
-      STATE.signIn.email = t.value;
+      STATE.signIn.email = value;
       if (STATE.signIn.error) STATE.signIn.error = "";
     }
 
     if (field === "signin-password") {
-      STATE.signIn.password = t.value;
+      STATE.signIn.password = value;
       if (STATE.signIn.error) STATE.signIn.error = "";
     }
+
+    // Forgot password fields
+    if (field === "forgot-email") STATE.forgotPassword.email = value;
+    if (field === "forgot-code") STATE.forgotPassword.code = value;
+    if (field === "forgot-new") STATE.forgotPassword.newPassword = value;
+    if (field === "forgot-confirm") STATE.forgotPassword.confirmPassword = value;
+
+    // Change password fields
+    if (field === "change-current") STATE.changePassword.currentPassword = value;
+    if (field === "change-new") STATE.changePassword.newPassword = value;
+    if (field === "change-confirm") STATE.changePassword.confirmPassword = value;
+
+    if (STATE.forgotPassword.error) STATE.forgotPassword.error = "";
+    if (STATE.changePassword.error) STATE.changePassword.error = "";
   });
 
   // Content protection: disable context menu on CourseContent root (mirrors TSX onContextMenu)
@@ -497,6 +877,13 @@ const WORKBOOK_API_URL = new URL("../api/ensure_workbook.php", import.meta.url).
     requestAnimationFrame(() => {
       __afterRenderQueued = false;
       syncYouTubeAutoComplete();
+      wrapEbookTablesForScroll();
+
+      if (__pendingEbookTop) {
+        __pendingEbookTop = false;
+        forceEbookTop();
+        requestAnimationFrame(forceEbookTop);
+      }
     });
   };
 

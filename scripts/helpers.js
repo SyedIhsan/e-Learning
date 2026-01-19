@@ -46,6 +46,7 @@ export const handleLogout = () => {
   STATE.user = null;
   localStorage.removeItem("sdc_user");
   localStorage.removeItem("sdc_user_email");
+  localStorage.removeItem("sdc_purchased");
 };
 
 export const getPath = () => {
@@ -108,14 +109,12 @@ export const resetPageStatesOnRoute = (path) => {
     if (path === "/signin") {
       if (!STATE.signIn.active) {
         STATE.signIn.active = true;
-        STATE.signIn.id = "";
         STATE.signIn.email = "";
         STATE.signIn.password = "";
         STATE.signIn.error = "";
       }
     } else if (STATE.signIn.active) {
       STATE.signIn.active = false;
-      STATE.signIn.id = "";
       STATE.signIn.email = "";
       STATE.signIn.password = "";
       STATE.signIn.error = "";
@@ -231,21 +230,54 @@ export const initCourseContent = (courseId) => {
     }
   };
 
+const PROGRESS_SAVE_URL = new URL("../api/progress/save.php", import.meta.url).toString();
+
+const mapContentType = (type) => {
+  if (type === "videos") return "video";
+  if (type === "ebooks") return "ebook";
+  return "workbook"; // workbooks
+};
+
 export const toggleCompletion = (type, itemId) => {
-    const cc = STATE.courseContent;
-    const list = cc.completion[type] || [];
-    const exists = list.includes(itemId);
-    const updated = exists ? list.filter((x) => x !== itemId) : [...list, itemId];
-    cc.completion = { ...cc.completion, [type]: updated };
-    const user = STATE.user;
-    const courseId = cc.courseId;
-    if (user && courseId) {
-      localStorage.setItem(
-        `sdc_course_progress_${user.id}_${courseId}`,
-        JSON.stringify(cc.completion)
-      );
-    }
-  };
+  const cc = STATE.courseContent;
+  const list = cc.completion[type] || [];
+  const exists = list.includes(itemId);
+
+  const completed = !exists; // kalau tak wujud → bila toggle, dia jadi complete
+
+  const updated = exists ? list.filter((x) => x !== itemId) : [...list, itemId];
+  cc.completion = { ...cc.completion, [type]: updated };
+
+  const user = STATE.user;
+  const courseId = cc.courseId;
+
+  // keep localStorage (existing behavior)
+  if (user && courseId) {
+    localStorage.setItem(
+      `sdc_course_progress_${user.id}_${courseId}`,
+      JSON.stringify(cc.completion)
+    );
+
+    // ✅ Sync to server (fire-and-forget)
+    fetch(PROGRESS_SAVE_URL, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        course_id: courseId,
+        content_type: mapContentType(type), // video | ebook | workbook
+        content_id: String(itemId),
+        completed: completed,
+      }),
+      keepalive: true, // optional: helps if user quickly leaves page
+    })
+      .then((r) => r.json().catch(() => null))
+      .then((res) => {
+        if (!res || res.ok !== true) console.warn("progress save failed:", res);
+      })
+      .catch((err) => console.warn("progress save error:", err));
+  }
+};
 
 export const isCompleted = (type, itemId) => {
     const list = STATE.courseContent.completion[type] || [];

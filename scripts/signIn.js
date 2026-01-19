@@ -2,7 +2,7 @@ import { escapeHtml } from "./helpers.js";
 import STATE from "./state.js";
 
 const renderSignIn = () => {
-    const { error, id, email, password } = STATE.signIn;
+    const { error, email, password } = STATE.signIn;
 
     return `
 <div class="min-h-screen flex items-center justify-center bg-slate-50 px-4">
@@ -12,7 +12,7 @@ const renderSignIn = () => {
         <span class="text-white font-bold text-2xl">SDC</span>
       </div>
       <h2 class="text-3xl font-extrabold text-slate-900 mb-2">Welcome Back</h2>
-      <p class="text-slate-500">Sign in with your Student ID (SDCELxxxx). Email is required for Workbook access.</p>
+      <p class="text-slate-500">Sign in with your purchase email and password.</p>
     </div>
 
     <form data-action="signin-submit" class="space-y-6">
@@ -24,22 +24,12 @@ const renderSignIn = () => {
           : ""
       }
 
-      <div>
-        <label class="block text-sm font-bold text-slate-700 mb-2">Access ID</label>
-        <input data-field="signin-id" type="text" value="${escapeHtml(
-          id
-        )}" placeholder="e.g. SDC-XXXXXX"
-          class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all" />
-      </div>
-
-
 <div>
-  <label class="block text-sm font-bold text-slate-700 mb-2">Email (Workbook Access)</label>
+  <label class="block text-sm font-bold text-slate-700 mb-2">Email</label>
   <input data-field="signin-email" type="email" value="${escapeHtml(
     email
   )}" placeholder="e.g. you@email.com"
     class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all" />
-  <p class="mt-2 text-xs text-slate-400 font-semibold">This email will receive permission to edit Google Sheet.</p>
 </div>
 
       <div>
@@ -48,6 +38,7 @@ const renderSignIn = () => {
           password
         )}" placeholder="Your secure password"
           class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all" />
+          <a href="#/forgot-password" class="text-yellow-500 text-sm font-bold hover:underline">Forgot password?</a>
       </div>
 
       <button type="submit"

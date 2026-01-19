@@ -2,6 +2,16 @@ import { escapeHtml, navigate } from "./helpers.js";
 import STATE from "./state.js";
 import { COURSES } from "../data/course.js";
 
+const SHOW_SANDBOX = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+
+// Price display helper (always show RM prefix)
+const formatRM = (price) => {
+  const s = String(price ?? "").trim();
+  if (!s) return "";
+  if (/^rm\s*/i.test(s)) return s.replace(/^rm\s*/i, "RM");
+  return `RM${s}`;
+};
+
 // Vanilla (HTML/CSS/JS) port of Checkout.tsx (UI 1:1)
 // Route: #/checkout/:courseId
 const renderCheckout = (courseId) => {
@@ -137,6 +147,8 @@ const renderCheckout = (courseId) => {
 
             <button
               type="submit"
+              name="pay_mode"
+              value="live"
               ${processing || !agreed ? "disabled" : ""}
               class="w-full py-5 rounded-2xl font-black text-xl shadow-2xl transition-all flex items-center justify-center space-x-3 ${btnClass}"
             >
@@ -149,9 +161,21 @@ const renderCheckout = (courseId) => {
                 </svg>
                 <span>Processing Enrollment...</span>
               `
-                  : `<span>Complete Enrollment - ${escapeHtml(course.price)}</span>`
+                  : `<span>Complete Enrollment - ${escapeHtml(formatRM(course.price))}</span>`
               }
             </button>
+            
+            ${SHOW_SANDBOX ? `
+            <button
+              type="submit"
+              name="pay_mode"
+              value="sandbox"
+              ${processing || !agreed ? "disabled" : ""}
+              class="w-full py-4 rounded-2xl font-black text-sm shadow-lg transition-all flex items-center justify-center bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Test Sandbox Payment - ${escapeHtml(formatRM(course.price))}
+            </button>
+            ` : ""}
 
             <p class="text-center text-[10px] text-slate-400 uppercase tracking-widest font-black">
               🛡️ Secure Digital Enrollment &amp; Content Protection
@@ -182,7 +206,7 @@ const renderCheckout = (courseId) => {
           <div class="space-y-4 mb-8">
             <div class="flex justify-between text-sm">
               <span class="text-slate-400">Course Fee</span>
-              <span class="font-bold">${escapeHtml(course.price)}</span>
+              <span class="font-bold">${escapeHtml(formatRM(course.price))}</span>
             </div>
             <div class="flex justify-between text-sm">
               <span class="text-slate-400">Digital Processing</span>
@@ -191,7 +215,7 @@ const renderCheckout = (courseId) => {
             <div class="pt-4 border-t border-white/10 flex justify-between">
               <span class="font-black text-lg">Total Due</span>
               <span class="font-black text-2xl text-indigo-400">${escapeHtml(
-                course.price
+                formatRM(course.price)
               )}</span>
             </div>
           </div>

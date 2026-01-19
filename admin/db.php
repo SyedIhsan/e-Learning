@@ -1,20 +1,26 @@
 <?php
-declare(strict_types=1);
+// e-Learning/admin/db.php (e-Learning DB only)
 
-/**
- * SiteGround DB credentials:
- * - DB_HOST: usually "localhost"
- * - DB_NAME, DB_USER, DB_PASS: from Site Tools > MySQL > Databases/Users
- *
- * Tip: keep this file not world-readable if possible.
- */
+$servername = 'sgp42.siteground.asia';
+$username   = 'ugqyxdzz6cljt';
+$password   = '2)(Ak(<n@1c1';
+$dbname     = 'dbyxrbeaeo77ih';
+
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+error_reporting(E_ALL);
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-$DB_HOST = "localhost";
-$DB_NAME = "sdc_elearning";
-$DB_USER = "root";
-$DB_PASS = "";
+try {
+  $conn = new mysqli($servername, $username, $password, $dbname);
+  $conn->set_charset('utf8mb4');
 
-$conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
-$conn->set_charset("utf8mb4");
+  // IMPORTANT: provide a dedicated variable for router usage
+  $conn_elearning = $conn;
+
+} catch (mysqli_sql_exception $e) {
+  http_response_code(500);
+  header('Content-Type: text/plain; charset=utf-8');
+  exit('DB connection failed (e-Learning).');
+}

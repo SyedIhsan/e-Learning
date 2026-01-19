@@ -23,7 +23,7 @@ const renderDashboard = () => {
         : purchasedCourses.filter((course) => course.level === filter);
 
     return `
-<div class="bg-slate-50 min-h-screen py-16">
+<div class="bg-slate-50 min-h-screen py-16 overflow-x-hidden">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <header class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
       <div>
@@ -33,11 +33,11 @@ const renderDashboard = () => {
         )}</span></p>
       </div>
 
-      <div class="flex bg-slate-200/50 p-1.5 rounded-2xl border border-slate-200 self-start md:self-auto overflow-x-auto whitespace-nowrap">
+      <div class="flex bg-slate-200/50 p-1.5 rounded-2xl border border-slate-200 self-center md:self-auto overflow-x-auto whitespace-nowrap w-full max-w-full md:w-auto min-w-0 touch-pan-x justify-center">
         ${filters
           .map(
             (f) => `
-          <button data-action="dashboard-filter" data-filter="${escapeHtml(f)}" class="px-6 py-2.5 text-sm font-black rounded-xl transition-all ${
+          <button data-action="dashboard-filter" data-filter="${escapeHtml(f)}" class="flex-shrink-0 min-w-max px-4 sm:px-6 py-2 text-xs sm:text-sm font-black rounded-xl transition-all ${
               filter === f
                 ? "bg-white text-yellow-500 shadow-sm"
                 : "text-slate-500 hover:text-slate-900"
