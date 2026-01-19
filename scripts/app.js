@@ -162,101 +162,39 @@ const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toStr
   // -----------------------------
   // Event delegation (click, submit, input, contextmenu)
   // -----------------------------
-  document.addEventListener("submit", async (e) => {
-    const form = e.target?.closest?.('form[data-action="footer-subscribe-form"]');
-    if (!form) return;
-
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    if (typeof form.reportValidity === "function" && !form.reportValidity()) return;
-
-    const input = form.querySelector('input[type="email"]');
-    const btn = form.querySelector('button[type="submit"]');
-    const msg = form.querySelector('[data-role="footer-subscribe-msg"]');
-
-    const email = (input?.value || "").trim();
-    if (!email) return;
-
-    const levels = ["beginner", "intermediate", "advanced"];
-
-    const setMsg = (text, ok = true) => {
-      if (!msg) return;
-      msg.classList.remove("hidden");
-      msg.textContent = text;
-      msg.className = `text-xs text-center ${ok ? "text-emerald-300" : "text-rose-300"}`;
-    };
-
-    try {
-      if (btn) { btn.disabled = true; btn.textContent = "SUBSCRIBING..."; }
-      if (input) input.disabled = true;
-
-      await Promise.all(
-        levels.map(async (level) => {
-          const res = await fetch("/e-Learning/api/waitlist_subscribe.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, level }),
-          });
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok || !data.ok) throw new Error(data.error || `Subscribe failed (${level})`);
-        })
-      );
-
-      setMsg("Subscribed! You’ll get notified for any new course.", true);
-      if (input) input.value = "";
-    } catch (err) {
-      setMsg(err?.message || "Something went wrong. Try again.", false);
-    } finally {
-      if (btn) { btn.disabled = false; btn.textContent = "SUBSCRIBE NOW"; }
-      if (input) input.disabled = false;
-    }
-  });
-
-  document.addEventListener("submit", async (e) => {
+  document.addEventListener("submit", (e) => {
     const form = e.target?.closest?.('form[data-action="waitlist-form"]');
     if (!form) return;
-
+   
     e.preventDefault();
+   
+    // trigger native validation (required email)
     if (typeof form.reportValidity === "function" && !form.reportValidity()) return;
-
+   
     const level = form.getAttribute("data-level") || "";
-    const email = (form.querySelector('input[type="email"]')?.value || "").trim();
-
     if (!STATE.coursePage) STATE.coursePage = {};
+   
+    // sync state ikut level
     if (STATE.coursePage.waitlistLevel !== level) {
       STATE.coursePage.waitlistLevel = level;
-      STATE.coursePage.waitlist = { isNotifying: false, isNotified: false, error: "" };
+      STATE.coursePage.waitlist = { isNotifying: false, isNotified: false };
     }
-    if (!STATE.coursePage.waitlist) STATE.coursePage.waitlist = { isNotifying:false, isNotified:false, error:"" };
-
+    if (!STATE.coursePage.waitlist) {
+      STATE.coursePage.waitlist = { isNotifying: false, isNotified: false };
+    }
+   
     const wl = STATE.coursePage.waitlist;
     if (wl.isNotifying || wl.isNotified) return;
-
+   
     wl.isNotifying = true;
-    wl.error = "";
-    render();
-
-    try {
-      const res = await fetch("/e-Learning/api/waitlist_subscribe.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, level }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.ok) throw new Error(data.error || "Request failed");
-
+    render(); // guna render() existing kau
+   
+    setTimeout(() => {
       wl.isNotifying = false;
       wl.isNotified = true;
       render();
-    } catch (err) {
-      wl.isNotifying = false;
-      wl.error = err?.message || "Something went wrong";
-      render();
-    }
+    }, 1500);
   });
-
-  const canHoverFinePointer = () =>
-    window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
   document.addEventListener(
     "pointerover",

@@ -169,7 +169,7 @@ const renderCoursePage = (level) => {
               <h2 class="text-3xl font-black text-slate-900 leading-tight flex-1">${escapeHtml(
                 course.title
               )}</h2>
-              <div class="text-2xl font-black text-yellow-500 mt-2 sm:mt-0">RM${escapeHtml(
+              <div class="text-2xl font-black text-yellow-500 mt-2 sm:mt-0">${escapeHtml(
                 course.price
               )}</div>
             </div>
