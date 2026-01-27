@@ -70,7 +70,7 @@ const renderCourseContent = (courseId) => {
     return `
 <div id="course-content-root" class="bg-white min-h-screen flex flex-col">
   <div class="bg-slate-900 text-white py-4 px-6 sm:px-8 border-b border-slate-800">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div class="flex items-center space-x-4">
         <a href="#/dashboard" class="p-2 hover:bg-white/10 rounded-full transition-colors">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,11 +87,12 @@ const renderCourseContent = (courseId) => {
         </div>
       </div>
 
-      <div class="flex bg-slate-800 p-1 rounded-xl">
+      <div class="flex bg-slate-800 p-1 rounded-xl self-center md:self-auto w-full md:w-auto">
         ${["video", "ebook", "workbook"]
           .map(
             (tab) => `
-          <button data-action="content-tab" data-tab="${tab}" class="px-4 py-2 text-sm font-bold rounded-lg capitalize transition-all ${
+          <button data-action="content-tab" data-tab="${tab}"
+          class="flex-1 md:flex-none px-4 py-2 text-sm font-bold rounded-lg capitalize transition-all ${
               activeTab === tab ? "bg-yellow-500 text-white" : "text-slate-400 hover:text-white"
             }">${tab}</button>`
           )
@@ -305,12 +306,15 @@ const renderCourseContent = (courseId) => {
           activeTab === "ebook" && selectedEbook
             ? `
         <div class="flex-grow flex flex-col">
-          <div class="flex-grow overflow-y-auto p-8 md:p-16 bg-white selection:bg-yellow-100">
+          <div id="ebook-scroll" class="flex-grow overflow-y-auto overflow-x-hidden p-6 sm:p-8 md:p-16 bg-white selection:bg-yellow-100 min-w-0">
             <div class="max-w-3xl mx-auto">
               <h1 class="text-4xl font-black text-slate-900 mb-10 border-b-8 border-yellow-100 inline-block">${escapeHtml(
                 selectedEbook.title
               )}</h1>
-              <div class="course-ebook-content prose prose-slate prose-lg">${selectedEbook.content}</div>
+
+              <div id="ebook-html" class="course-ebook-content prose prose-slate prose-lg break-words overflow-x-hidden">
+                ${selectedEbook.content}
+              </div>
             </div>
           </div>
           <div class="p-8 bg-slate-50 border-t border-slate-100 flex items-center justify-center">
@@ -339,6 +343,12 @@ const renderCourseContent = (courseId) => {
             .course-ebook-content h3 { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-top: 2.5rem; margin-bottom: 1rem; }
             .course-ebook-content p { color: #475569; line-height: 1.8; margin-bottom: 1.5rem; font-size: 1.1rem; }
             .course-ebook-content code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #4f46e5; }
+
+            /* === Mobile horizontal overflow fix === */
+            .course-ebook-content .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; }
+            .course-ebook-content .table-scroll table { width: max-content; min-width: 100%; border-collapse: collapse; }
+            .course-ebook-content .table-scroll th, .course-ebook-content .table-scroll td { white-space: nowrap; word-break: normal; overflow-wrap: normal; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }
+            .course-ebook-content .table-scroll td:last-child { white-space: normal; min-width: 240px; }
           </style>
         </div>
         `
@@ -383,7 +393,7 @@ const renderCourseContent = (courseId) => {
                 ? `
               <iframe data-scroll-lock="worksheet" src="${escapeHtml(
                 wbUrl
-              )}" class="w-full h-full min-h-[500px] border-none" title="${escapeHtml(
+              )}" class="w-full h-full min-h-[500px] border-none touch-auto" title="${escapeHtml(
                 selectedWorkbook.title
               )}"></iframe>
               `
@@ -410,20 +420,20 @@ const renderCourseContent = (courseId) => {
                 selectedWorkbook.title
               )}</h3>
               <p class="text-yellow-700 text-sm">
-                Kalau iframe tak bagi edit (browser block cookies), klik "Open in Google Sheets".
+                If you can’t edit inside the iframe (your browser is blocking cookies), click “Open in Google Sheets”.
               </p>
             </div>
 
-            <div class="flex gap-3 flex-wrap justify-end">
+            <div class="grid grid-cols-2 lg:grid-cols-1 gap-3 w-full max-w-xl lg:max-w-sm ml-auto">
               ${
                 wbUrl
-                  ? `<a target="_blank" href="${escapeHtml(wbUrl).replace("?rm=minimal","")}" class="px-6 py-3 rounded-xl font-black text-sm bg-white text-yellow-700 border border-yellow-200 hover:border-yellow-500 transition">Open in Google Sheets</a>`
+                  ? `<a target="_blank" href="${escapeHtml(wbUrl).replace("?rm=minimal","")}" class="w-full px-4 py-3 rounded-xl font-black text-sm bg-white text-yellow-700 border border-yellow-200 hover:border-yellow-500 transition text-center flex items-center justify-center">Open in Google Sheets</a>`
                   : `<button data-action="workbook-ensure" class="px-6 py-3 rounded-xl font-black text-sm bg-white text-yellow-700 border border-yellow-200 hover:border-yellow-500 transition">Prepare</button>`
               }
 
               <button data-action="content-toggle" data-type="workbooks" data-id="${escapeHtml(
                 selectedWorkbook.id
-              )}" class="flex items-center space-x-2 px-6 py-3 rounded-xl font-black text-sm transition-all ${
+              )}" class="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-xl font-black text-sm transition-all ${
                 isCompleted("workbooks", selectedWorkbook.id)
                   ? "bg-emerald-600 text-white shadow-lg shadow-emerald-100"
                   : "bg-white text-yellow-600 border border-yellow-200 hover:border-yellow-600"

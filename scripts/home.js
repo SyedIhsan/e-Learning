@@ -1,7 +1,9 @@
 import STATE from "./state.js";
+import { COURSES } from "../data/course.js";
 
 const renderHome = () => {
     const user = STATE.user;
+    const courseCount = Object.keys(COURSES || {}).length;
 
     return `
 <div class="overflow-hidden">
@@ -12,11 +14,11 @@ const renderHome = () => {
         <span>Bundle Packs Released</span>
       </div>
       <h1 class="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-8">
-        The Ultimate Learning <br />
-        <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-yellow-600">Ecosystem</span>
+        Learn Crypto From <br />
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-yellow-600">Beginner to Advanced</span>
       </h1>
       <p class="max-w-2xl mx-auto text-xl text-slate-600 leading-relaxed mb-10">
-        Premium masterclasses, interactive ebooks, and automated workbooks. Explore our specialized tracks for every skill level.
+        A structured e-learning path covering CEX basics, Crypto fundamentals, on-chain analysis, and risk management — built for real market conditions.
       </p>
       <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
         ${
@@ -48,14 +50,13 @@ const renderHome = () => {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid md:grid-cols-2 gap-16 items-center">
         <div>
-          <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Specialized Tracks for Real Success</h2>
+          <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Institutional-Grade Crypto Education</h2>
           <p class="text-lg text-slate-600 mb-8 leading-relaxed">
-            We don't just sell courses; we provide comprehensive digital learning environments. Each level contains multiple specialized modules.
-            Buy the specific course that fits your current needs and get instant, lifetime access.
+            Most “crypto gurus” sell hype. We teach a system — built on market structure, on-chain signals, and risk-first execution. Every track is designed to help you make decisions like a professional, not a gambler.
           </p>
           <div class="grid grid-cols-2 gap-8">
             <div>
-              <div class="text-3xl font-bold text-yellow-500 mb-1">9 Courses</div>
+              <div class="text-3xl font-bold text-yellow-500 mb-1">${courseCount} Courses</div>
               <div class="text-sm text-slate-500 font-medium">Ready for Enrollment</div>
             </div>
             <div>
@@ -66,15 +67,15 @@ const renderHome = () => {
         </div>
         <div class="relative">
           <div class="grid grid-cols-2 gap-4">
-            <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=400" class="rounded-3xl shadow-lg" alt="Study 1" />
-            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=400" class="rounded-3xl shadow-lg mt-8" alt="Study 2" />
+            <img src="https://www.thewallstreetschool.com/blog/wp-content/uploads/2024/12/Untitled-design-2024-12-02T112621.343.jpg" class="rounded-3xl shadow-lg" alt="Study 1" />
+            <img src="https://cdn.prod.website-files.com/68b69f4a2b57f5b22e3f9975/694a84ae46bb9192fce702e4_3349.jpg" class="rounded-3xl shadow-lg mt-8" alt="Study 2" />
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="py-24 bg-white">
+  <section id="learning-tracks" class="py-24 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <h2 class="text-4xl font-black text-slate-900 mb-16">Explore Our Learning Tracks</h2>
       <div class="grid md:grid-cols-3 gap-8">
@@ -87,7 +88,7 @@ const renderHome = () => {
               <span class="text-yellow-500 font-black text-xl">${lvl[0]}</span>
             </div>
             <h3 class="text-2xl font-black text-slate-900 group-hover:text-white mb-4">${lvl} Track</h3>
-            <p class="text-slate-500 group-hover:text-yellow-50 text-sm mb-8">Discover 3 specialized products tailored for ${lvl} learners.</p>
+            <p class="text-slate-500 group-hover:text-yellow-50 text-sm mb-8">Discover our specialized products tailored for ${lvl} learners.</p>
             <span class="text-yellow-500 group-hover:text-white font-bold text-sm">View Catalog &rarr;</span>
           </a>`;
           })

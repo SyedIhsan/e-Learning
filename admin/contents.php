@@ -206,7 +206,7 @@ include __DIR__ . "/partials/header.php";
 include __DIR__ . "/partials/nav.php";
 ?>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<div class="max-w-7xl mx-auto w-full py-6 min-w-0">
   <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
     <div>
       <h1 class="text-4xl font-black mb-2">Content</h1>
@@ -255,18 +255,18 @@ include __DIR__ . "/partials/nav.php";
     <div class="absolute top-0 right-0 w-64 h-64 bg-yellow-500/10 rounded-full blur-[80px] -mr-32 -mt-32"></div>
   </div>
 
-  <div class="grid lg:grid-cols-3 gap-8">
+  <div class="grid lg:grid-cols-3 gap-8 min-w-0">
     <!-- Add forms -->
-    <div class="lg:col-span-1 space-y-8">
+    <div class="lg:col-span-1 space-y-8 min-w-0">
       <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 p-8">
         <h3 class="text-lg font-black mb-4">Add Video</h3>
         <form method="POST" class="space-y-3">
           <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
           <input type="hidden" name="action" value="add_video">
           <input type="hidden" name="course_id" value="<?= e($courseId) ?>">
-          <input name="title" placeholder="Video title" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
-          <input name="url" placeholder="YouTube embed URL (https://www.youtube.com/embed/...)" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
-          <textarea name="description" rows="3" placeholder="Optional description" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl"></textarea>
+          <input name="title" placeholder="Video title" class="w-full min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
+          <input name="url" placeholder="YouTube embed URL (https://www.youtube.com/embed/...)" class="w-full min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
+          <textarea name="description" rows="3" placeholder="Optional description" class="w-full min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl"></textarea>
           <button class="w-full py-3 bg-yellow-500 text-white font-bold rounded-2xl hover:bg-yellow-600 transition">Add Video</button>
         </form>
       </div>
@@ -277,8 +277,8 @@ include __DIR__ . "/partials/nav.php";
           <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
           <input type="hidden" name="action" value="add_ebook">
           <input type="hidden" name="course_id" value="<?= e($courseId) ?>">
-          <input name="title" placeholder="Ebook title" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
-          <textarea name="content" rows="8" placeholder="HTML content (e.g. <h2>Title</h2><p>...</p>)" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-sm"></textarea>
+          <input name="title" placeholder="Ebook title" class="w-full min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
+          <textarea name="content" rows="8" placeholder="HTML content (e.g. <h2>Title</h2><p>...</p>)" class="w-full min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-sm"></textarea>
           <button class="w-full py-3 bg-yellow-500 text-white font-bold rounded-2xl hover:bg-yellow-600 transition">Add Ebook</button>
         </form>
         <p class="text-xs text-slate-400 mt-3">Student page renders ebook content as HTML (same pattern as current data).</p>
@@ -290,16 +290,16 @@ include __DIR__ . "/partials/nav.php";
           <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
           <input type="hidden" name="action" value="add_workbook">
           <input type="hidden" name="course_id" value="<?= e($courseId) ?>">
-          <input name="content_id" placeholder="Workbook ID (e.g. beg-101-1)" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
-          <input name="title" placeholder="Workbook title" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
-          <input name="url" placeholder="Google Sheet share URL / embed URL" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
+          <input name="content_id" placeholder="Workbook ID (e.g. beg-101-1)" class="w-full min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
+          <input name="title" placeholder="Workbook title" class="w-full min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
+          <input name="url" placeholder="Google Sheet share URL / embed URL" class="w-full min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
           <button class="w-full py-3 bg-yellow-500 text-white font-bold rounded-2xl hover:bg-yellow-600 transition">Add Workbook</button>
         </form>
       </div>
     </div>
 
     <!-- Lists -->
-    <div class="lg:col-span-2 space-y-8">
+    <div class="lg:col-span-2 space-y-8 min-w-0">
 
       <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 p-8">
         <div class="flex items-center justify-between mb-4">
@@ -311,10 +311,10 @@ include __DIR__ . "/partials/nav.php";
         <?php endif; ?>
         <div class="space-y-4">
           <?php foreach ($videos as $v): ?>
-            <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 overflow-hidden">
               <div class="min-w-0">
                 <div class="font-black text-slate-900 truncate"><?= e($v["title"]) ?></div>
-                <div class="text-xs text-slate-500 truncate"><?= e($v["url"]) ?></div>
+                <div class="text-xs text-slate-500 break-all line-clamp-2"><?= e($v["url"]) ?></div>
                 <?php if (!empty($v["description"])): ?>
                   <div class="text-sm text-slate-600 mt-1"><?= e((string)$v["description"]) ?></div>
                 <?php endif; ?>
@@ -341,7 +341,7 @@ include __DIR__ . "/partials/nav.php";
         <?php endif; ?>
         <div class="space-y-4">
           <?php foreach ($ebooks as $e): ?>
-            <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 overflow-hidden">
               <div class="min-w-0">
                 <div class="font-black text-slate-900"><?= e($e["title"]) ?></div>
                 <div class="text-xs text-slate-500">Stored as HTML (LONGTEXT).</div>
@@ -368,10 +368,10 @@ include __DIR__ . "/partials/nav.php";
         <?php endif; ?>
         <div class="space-y-4">
           <?php foreach ($workbooks as $w): ?>
-            <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 overflow-hidden">
               <div class="min-w-0">
                 <div class="font-black text-slate-900 truncate"><?= e($w["title"]) ?></div>
-                <div class="text-xs text-slate-500 truncate"><?= e($w["url"]) ?></div>
+                <div class="text-xs text-slate-500 break-all line-clamp-2"><?= e($w["url"]) ?></div>
               </div>
               <form method="POST" onsubmit="return confirm('Delete this workbook?');">
                 <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">

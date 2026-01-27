@@ -8,7 +8,7 @@ const STATE = {
   // Page states (reset on mount/unmount like React)
   coursePage: { level: null, buyingId: null, successId: null },
   courseDetail: { active: false, buying: false, success: false, lastCourseId: null },
-  signIn: { active: false, id: "", email: "", password: "", error: "" },
+  signIn: { active: false, email: "", password: "", error: "" },
   dashboard: { active: false, filter: "All" },
   checkout: {
     active: false,
@@ -35,6 +35,24 @@ const STATE = {
     workbookSheetUrls: {}, // key: `${courseId}:${workbookId}` => embedUrl
     workbookLoadingKey: null,
     workbookError: "",
+  },
+  forgotPassword: {
+    stage: "request", // "request" | "reset"
+    email: "",
+    code: "",
+    newPassword: "",
+    confirmPassword: "",
+    loading: false,
+    message: "",
+    error: ""
+  },
+  changePassword: {
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+    loading: false,
+    message: "",
+    error: ""
   },
 
   prevPath: null,

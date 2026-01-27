@@ -2,6 +2,12 @@ import { escapeHtml, getPurchasedList, encodeQS } from "./helpers.js";
 import STATE from "./state.js";
 import { COURSES_DATA } from "../data/course.js";
 
+const truncateText = (text, max = 260) => {
+  const s = String(text || "").replace(/\s+/g, " ").trim();
+  if (s.length <= max) return s;
+  return s.slice(0, max).replace(/[,\s]+$/, "") + "…";
+};
+
 const ensureWaitlistState = (level) => {
   if (!STATE.coursePage) STATE.coursePage = {};
   if (STATE.coursePage.waitlistLevel !== level) {
@@ -169,13 +175,13 @@ const renderCoursePage = (level) => {
               <h2 class="text-3xl font-black text-slate-900 leading-tight flex-1">${escapeHtml(
                 course.title
               )}</h2>
-              <div class="text-2xl font-black text-yellow-500 mt-2 sm:mt-0">${escapeHtml(
+              <div class="text-2xl font-black text-yellow-500 mt-2 sm:mt-0">RM${escapeHtml(
                 course.price
               )}</div>
             </div>
-            <p class="text-slate-500 text-lg mb-8 leading-relaxed max-w-xl">${escapeHtml(
-              course.description
-            )}</p>
+            <p class="text-slate-500 text-lg mb-8 leading-relaxed max-w-xl line-clamp-3">
+              ${escapeHtml(course.description)}
+            </p>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
               ${modules
@@ -263,7 +269,7 @@ const renderCoursePage = (level) => {
                 </svg>
                 <span>Securing...</span>
               `
-                  : `<span>Enroll - ${escapeHtml(course.price)}</span>`
+                  : `<span>Enroll - RM${escapeHtml(course.price)}</span>`
               }
             </button>
             `

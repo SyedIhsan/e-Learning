@@ -9,9 +9,11 @@ $title = $title ?? "SDC Admin";
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><?= e($title) ?></title>
+  <link href="../../../img/sdc_logo.png" rel="icon">
   <!-- Tailwind CDN (same idea as student site) -->
   <script src="https://cdn.tailwindcss.com?plugins=typography,line-clamp,aspect-ratio"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./assets/admin.css" />
 </head>
-<body class="bg-slate-50 text-slate-900">
+<body class="bg-slate-50 text-slate-900 antialiased overflow-x-hidden"
+      style="font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;">
