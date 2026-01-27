@@ -58,7 +58,7 @@ function ui_msg(string $msg): array {
       <div class="flex gap-3">
         <a href="connect_google.php"
           class="px-8 py-4 bg-yellow-500 text-white font-black rounded-2xl hover:bg-yellow-600 shadow-lg shadow-yellow-100 transition active:scale-95">
-          Connect Google
+          Connect
         </a>
 
         <?php if ($refresh): ?>

@@ -19,8 +19,13 @@ const renderNavbar = () => {
     <div class="flex justify-between items-center h-20">
       <div class="flex-shrink-0">
         <a href="${STATE.user ? '#/dashboard' : '#/'}" class="flex items-center space-x-2">
-          <div class="w-10 h-10 p-6 bg-yellow-500 rounded-lg flex items-center justify-center">
-            <span class="text-white font-bold text-xl">SDC</span>
+          <div class="h-10 w-10 shrink-0 flex items-center justify-center">
+            <img
+              src="../img/sdc_logo.png"
+              alt="SDC"
+              class="h-10 w-10 object-contain"
+              loading="lazy"
+            />
           </div>
           <span class="text-xl font-extrabold text-slate-900 tracking-tight hidden sm:block">e-Learning</span>
         </a>

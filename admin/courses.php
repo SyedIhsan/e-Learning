@@ -210,7 +210,7 @@ include __DIR__ . "/partials/nav.php";
                   <div>
                     <div class="text-[10px] font-black uppercase tracking-widest text-slate-400"><?= e($c["level"]) ?> • <?= e($c["id"]) ?></div>
                     <h3 class="text-2xl font-black text-slate-900"><?= e($c["title"]) ?></h3>
-                    <p class="text-slate-500 mt-2 line-clamp-2"><?= e($c["description"]) ?></p>
+                    <p class="text-slate-500 mt-2"><?= nl2br(e($c["description"])) ?></p>
                   </div>
                   <div class="text-2xl font-black text-yellow-500">RM<?= e($c["price"]) ?></div>
                 </div>

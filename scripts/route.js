@@ -8,12 +8,15 @@ import renderCoursePage from "./coursePage.js";
 import renderCourseDetail from "./courseDetail.js";
 import renderCourseContent from "./courseContent.js";
 import renderDashboard from "./dashboard.js";
+import renderHelpCenter from "./helpCenter.js";
+import renderInstructors from "./instructors.js";
 import renderSignIn from "./signIn.js";
 import renderCheckout from "./checkout.js";
 import renderForgotPassword from "./forgotPassword.js";
 import renderChangePassword from "./changePassword.js";
 
 import { resetPageStatesOnRoute } from "./helpers.js";
+import renderNotFound from "./notFound.js";
 
 const $app = () => document.getElementById("app");
 
@@ -103,6 +106,8 @@ export const renderRoute = (path) => {
 
   // Dashboard
   if (path === "/dashboard") return renderDashboard();
+  if (path === "/help") return renderHelpCenter();
+  if (path === "/instructors") return renderInstructors();
 
   // Auth
   if (path === "/signin") return renderSignIn();
@@ -116,31 +121,25 @@ export const renderRoute = (path) => {
   }
 
   // 404
-  return `
-    <div class="max-w-3xl mx-auto px-4 py-16">
-      <div class="bg-white rounded-2xl border border-slate-200 p-8">
-        <h1 class="text-2xl font-extrabold text-slate-900">Page not found</h1>
-        <p class="mt-2 text-slate-600">Route: <code class="text-slate-900">${path}</code></p>
-        <a class="inline-flex mt-6 px-4 py-2 rounded-xl bg-amber-500 text-slate-900 font-bold" href="#/">
-          Back to Home
-        </a>
-      </div>
-    </div>
-  `;
+  return renderNotFound();
 };
+
+let __lastPath = null;
 
 export const render = () => {
   const app = $app();
   if (!app) return;
 
-  const active = captureActiveField();
-
   const path = getPath();
+
+  const shouldScrollTop = path !== __lastPath;
+  __lastPath = path;
+
+  const active = captureActiveField();
   resetPageStatesOnRoute(path);
 
   const pageHtml = renderRoute(path);
 
-  // IMPORTANT: Navbar + Footer injected here
   app.innerHTML = `
     ${renderNavbar()}
     <main class="min-h-[calc(100vh-120px)] bg-slate-50">
@@ -148,6 +147,10 @@ export const render = () => {
     </main>
     ${renderFooter()}
   `;
+
+  if (shouldScrollTop) {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }
 
   restoreActiveField(active);
 };

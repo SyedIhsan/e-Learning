@@ -1,1 +1,8 @@
 body{font-family:'Inter',sans-serif;}
+
+/* Ebook anchor jump: avoid heading hidden under sticky header */
+.course-ebook-content h2,
+.course-ebook-content h3,
+.course-ebook-content [id] {
+  scroll-margin-top: 110px;
+}

@@ -324,45 +324,6 @@ include __DIR__ . "/partials/nav.php";
       <?php include __DIR__ . "/partials/footer.php"; exit; ?>
     <?php endif; ?>
 
-    <!-- stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between">
-        <div>
-          <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Active Learners</p>
-          <p class="text-3xl font-black text-slate-900"><?= (int)$stats["active_learners"] ?></p>
-        </div>
-        <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-          </svg>
-        </div>
-      </div>
-
-      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between">
-        <div>
-          <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Avg. Completion</p>
-          <p class="text-3xl font-black text-slate-900"><?= (int)$stats["avg_completion"] ?>%</p>
-        </div>
-        <div class="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-          </svg>
-        </div>
-      </div>
-
-      <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between">
-        <div>
-          <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Course Revenue</p>
-          <p class="text-3xl font-black text-slate-900">RM<?= number_format((float)$stats["revenue"], 2) ?></p>
-        </div>
-        <div class="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-          </svg>
-        </div>
-      </div>
-    </div>
-
     <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl overflow-hidden">
       <div class="p-8 border-b border-slate-50 flex items-center justify-between">
         <h2 class="text-xl font-black text-slate-900">Progress Overview</h2>

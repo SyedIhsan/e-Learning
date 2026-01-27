@@ -162,39 +162,134 @@ const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toStr
   // -----------------------------
   // Event delegation (click, submit, input, contextmenu)
   // -----------------------------
-  document.addEventListener("submit", (e) => {
+  document.addEventListener(
+    "click",
+    (e) => {
+      const a = e.target.closest?.("#ebook-html a");
+      if (!a) return;
+
+      const href = (a.getAttribute("href") || "").trim();
+      if (!href) return;
+
+      // jangan kacau router / external links
+      if (href.startsWith("#/")) return;
+      if (/^(https?:)?\/\//i.test(href)) return;
+      if (href.startsWith("mailto:") || href.startsWith("tel:")) return;
+
+      // kita handle anchor/TOC sahaja
+      const raw = href.startsWith("#") ? href.slice(1) : href;
+
+      // map "bab5" / "Bab 5" / "bab-5" -> "bab-5"
+      const m = raw.match(/^bab\s*-?\s*([0-9]+)$/i);
+      const id = m ? `bab-${m[1]}` : raw;
+
+      // IMPORTANT: block browser daripada tukar hash
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      const target = document.getElementById(id) || document.getElementById(raw);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    },
+    true // capture mode: intercept sebelum benda lain
+  );
+
+  document.addEventListener("submit", async (e) => {
+    const form = e.target?.closest?.('form[data-action="footer-subscribe-form"]');
+    if (!form) return;
+
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if (typeof form.reportValidity === "function" && !form.reportValidity()) return;
+
+    const input = form.querySelector('input[type="email"]');
+    const btn = form.querySelector('button[type="submit"]');
+    const msg = form.querySelector('[data-role="footer-subscribe-msg"]');
+
+    const email = (input?.value || "").trim();
+    if (!email) return;
+
+    const levels = ["beginner", "intermediate", "advanced"];
+
+    const setMsg = (text, ok = true) => {
+      if (!msg) return;
+      msg.classList.remove("hidden");
+      msg.textContent = text;
+      msg.className = `text-xs text-center ${ok ? "text-emerald-300" : "text-rose-300"}`;
+    };
+
+    try {
+      if (btn) { btn.disabled = true; btn.textContent = "SUBSCRIBING..."; }
+      if (input) input.disabled = true;
+
+      await Promise.all(
+        levels.map(async (level) => {
+          const res = await fetch("/e-Learning/api/waitlist_subscribe.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, level }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) throw new Error(data.error || `Subscribe failed (${level})`);
+        })
+      );
+
+      setMsg("Subscribed! You’ll get notified for any new course.", true);
+      if (input) input.value = "";
+    } catch (err) {
+      setMsg(err?.message || "Something went wrong. Try again.", false);
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = "SUBSCRIBE NOW"; }
+      if (input) input.disabled = false;
+    }
+  });
+
+  document.addEventListener("submit", async (e) => {
     const form = e.target?.closest?.('form[data-action="waitlist-form"]');
     if (!form) return;
-   
+
     e.preventDefault();
-   
-    // trigger native validation (required email)
     if (typeof form.reportValidity === "function" && !form.reportValidity()) return;
-   
+
     const level = form.getAttribute("data-level") || "";
+    const email = (form.querySelector('input[type="email"]')?.value || "").trim();
+
     if (!STATE.coursePage) STATE.coursePage = {};
-   
-    // sync state ikut level
     if (STATE.coursePage.waitlistLevel !== level) {
       STATE.coursePage.waitlistLevel = level;
-      STATE.coursePage.waitlist = { isNotifying: false, isNotified: false };
+      STATE.coursePage.waitlist = { isNotifying: false, isNotified: false, error: "" };
     }
-    if (!STATE.coursePage.waitlist) {
-      STATE.coursePage.waitlist = { isNotifying: false, isNotified: false };
-    }
-   
+    if (!STATE.coursePage.waitlist) STATE.coursePage.waitlist = { isNotifying:false, isNotified:false, error:"" };
+
     const wl = STATE.coursePage.waitlist;
     if (wl.isNotifying || wl.isNotified) return;
-   
+
     wl.isNotifying = true;
-    render(); // guna render() existing kau
-   
-    setTimeout(() => {
+    wl.error = "";
+    render();
+
+    try {
+      const res = await fetch("/e-Learning/api/waitlist_subscribe.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, level }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || "Request failed");
+
       wl.isNotifying = false;
       wl.isNotified = true;
       render();
-    }, 1500);
+    } catch (err) {
+      wl.isNotifying = false;
+      wl.error = err?.message || "Something went wrong";
+      render();
+    }
   });
+
+  const canHoverFinePointer = () =>
+    window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
   document.addEventListener(
     "pointerover",
@@ -222,6 +317,17 @@ const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toStr
     if (!el) return;
 
     const action = el.getAttribute("data-action");
+
+    // Help Center: clear search
+    if (action === "hc-clear") {
+      const input = document.getElementById("hc-search");
+      if (input && input instanceof HTMLInputElement) {
+        input.value = "";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.focus();
+      }
+      return;
+    }
 
     if (action === "nav-toggle") {
       STATE.nav.isMenuOpen = !STATE.nav.isMenuOpen;
@@ -628,6 +734,41 @@ const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toStr
     const t = e.target;
     if (!(t instanceof HTMLInputElement)) return;
 
+    // Help Center search (simple client-side filter)
+    if (t.id === "hc-search") {
+      const q = (t.value || "").toLowerCase().trim();
+
+      const items = Array.from(document.querySelectorAll(".hc-item"));
+      let visibleCount = 0;
+
+      items.forEach((el) => {
+        const hay = (el.getAttribute("data-haystack") || "").toLowerCase();
+        const show = !q || hay.includes(q);
+        el.classList.toggle("hidden", !show);
+        if (show) visibleCount += 1;
+      });
+
+      // Hide empty columns (category wrappers)
+      const cols = Array.from(document.querySelectorAll("#hc-grid > div"));
+      cols.forEach((col) => {
+        const anyVisible = !!col.querySelector(".hc-item:not(.hidden)");
+        col.classList.toggle("hidden", !anyVisible);
+      });
+
+      const empty = document.getElementById("hc-empty");
+      const grid = document.getElementById("hc-grid");
+      if (empty && grid) {
+        const showEmpty = visibleCount === 0;
+        empty.classList.toggle("hidden", !showEmpty);
+        grid.classList.toggle("hidden", showEmpty);
+
+        const title = document.getElementById("hc-empty-title");
+        if (title) title.textContent = showEmpty ? `No results found for "${t.value}"` : "";
+      }
+
+      return;
+    }
+
     // Checkout controlled inputs (ported from Checkout.tsx)
     const checkoutForm = t.closest('form[data-action="checkout-submit"]');
     if (checkoutForm) {
@@ -692,6 +833,29 @@ const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toStr
     }
   });
 
+  // Footer / any link: route + scroll to section
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest("a");
+    if (!a) return;
+
+    const scrollId = a.getAttribute("data-scroll");
+    const href = a.getAttribute("href") || "";
+
+    if (scrollId && href.startsWith("#/")) {
+      STATE.__pendingScrollId = scrollId;
+
+      const current = window.location.hash || "#/";
+
+      if (current !== href) {
+        window.location.hash = href; // 🔥 trigger hashchange + render
+      } else {
+        render(); // already on same route
+      }
+
+      return;
+    }
+  });
+
   // Close mobile menu when clicking any hash-link (like React onClick close)
   document.addEventListener("click", (e) => {
     const a = e.target.closest("a");
@@ -704,7 +868,13 @@ const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toStr
     }
   });
 
-  window.addEventListener("hashchange", () => render());
+  window.addEventListener("hashchange", () => {
+    // default: scroll to top on route change
+    if (!STATE.__pendingScrollId) {
+      window.scrollTo({ top: 0, behavior: "auto" });
+    }
+    render();
+  });
 
     // boot
   loadUserFromStorage();
@@ -821,6 +991,20 @@ const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toStr
         __pendingEbookTop = false;
         forceEbookTop();
         requestAnimationFrame(forceEbookTop);
+      }
+
+      // After render: perform pending scroll (for footer "Courses" -> section)
+      if (STATE.__pendingScrollId) {
+        const id = STATE.__pendingScrollId;
+        const el = document.getElementById(id);
+
+        if (el) {
+          // bagi layout settle dulu
+          requestAnimationFrame(() => {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+          STATE.__pendingScrollId = null;
+        }
       }
     });
   };

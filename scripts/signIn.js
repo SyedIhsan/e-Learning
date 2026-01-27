@@ -8,8 +8,13 @@ const renderSignIn = () => {
 <div class="min-h-screen flex items-center justify-center bg-slate-50 px-4">
   <div class="max-w-md w-full bg-white rounded-[2rem] shadow-2xl shadow-slate-200 border border-slate-100 p-8 md:p-12">
     <div class="text-center mb-10">
-      <div class="w-16 h-16 bg-yellow-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-yellow-100">
-        <span class="text-white font-bold text-2xl">SDC</span>
+      <div class="w-16 h-16 flex items-center justify-center mx-auto mb-6">
+        <img
+          src="../img/sdc_logo.png"
+          alt="SDC"
+          class="h-16 w-16 object-contain"
+          loading="lazy"
+        />
       </div>
       <h2 class="text-3xl font-extrabold text-slate-900 mb-2">Welcome Back</h2>
       <p class="text-slate-500">Sign in with your purchase email and password.</p>

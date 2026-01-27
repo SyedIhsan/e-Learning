@@ -12,12 +12,11 @@ const formatRM = (price) => {
   return `RM${s}`;
 };
 
-// Vanilla (HTML/CSS/JS) port of Checkout.tsx (UI 1:1)
 // Route: #/checkout/:courseId
 const renderCheckout = (courseId) => {
   const course = COURSES?.[courseId] || null;
 
-  // Match TSX behavior: if course not found, redirect away.
+  // If course not found, redirect away.
   if (!course) {
     navigate("/");
     return "";
@@ -37,7 +36,7 @@ const renderCheckout = (courseId) => {
       agreedTerms: false,
     };
 
-  // Success UI (matches Checkout.tsx)
+  // Success UI
   if (success) {
     return `
 <div class="min-h-[80vh] flex items-center justify-center bg-slate-50 px-4">
@@ -55,7 +54,7 @@ const renderCheckout = (courseId) => {
     </p>
     <a
       href="#/dashboard"
-      class="block w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-lg hover:bg-indigo-700 shadow-xl shadow-indigo-100 transition-all"
+      class="block w-full py-5 bg-yellow-600 text-white rounded-2xl font-black text-lg hover:bg-yellow-700 shadow-xl shadow-yellow-100 transition-all"
     >
       Go to Dashboard
     </a>
@@ -67,10 +66,10 @@ const renderCheckout = (courseId) => {
   const agreed = !!formData.agreedTerms;
 
   const btnClass = processing
-    ? "bg-indigo-400 text-white cursor-wait"
+    ? "bg-yellow-400 text-white cursor-wait"
     : !agreed
     ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
-    : "bg-indigo-600 text-white hover:bg-indigo-700 hover:scale-[1.02] shadow-indigo-100 active:scale-95";
+    : "bg-yellow-500 text-white hover:bg-yellow-600 hover:scale-[1.02] shadow-yellow-100 active:scale-95";
 
   return `
 <div class="bg-slate-50 min-h-screen py-16">
@@ -95,7 +94,7 @@ const renderCheckout = (courseId) => {
                   required
                   value="${escapeHtml(formData.fullName)}"
                   placeholder="Johnathan Doe"
-                  class="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  class="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -108,7 +107,7 @@ const renderCheckout = (courseId) => {
                     required
                     value="${escapeHtml(formData.email)}"
                     placeholder="you@example.com"
-                    class="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    class="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
                   />
                 </div>
                 <div>
@@ -119,7 +118,7 @@ const renderCheckout = (courseId) => {
                     required
                     value="${escapeHtml(formData.phoneNumber)}"
                     placeholder="+1 (555) 000-0000"
-                    class="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    class="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
                   />
                 </div>
               </div>
@@ -133,14 +132,14 @@ const renderCheckout = (courseId) => {
                     name="agreedTerms"
                     required
                     ${agreed ? "checked" : ""}
-                    class="peer h-6 w-6 cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white checked:bg-indigo-600 checked:border-indigo-600 focus:outline-none transition-all"
+                    class="peer h-6 w-6 cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white checked:bg-yellow-500 checked:border-yellow-500 focus:outline-none transition-all"
                   />
                   <svg class="absolute left-1 h-4 w-4 text-white opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
                 <span class="text-sm text-slate-600 font-medium leading-relaxed group-hover:text-slate-900 transition-colors">
-                  I certify that I am at least 18 years old and that I agree to the <a href="#" class="text-indigo-600 font-bold hover:underline">Terms &amp; Conditions</a> and <a href="#" class="text-indigo-600 font-bold hover:underline">Privacy Policy</a>.
+                  I certify that I am at least 18 years old and that I agree to the <a href="../../policy.html#rc" class="text-yellow-500 font-bold hover:underline">Terms &amp; Conditions</a> and <a href="../../policy.html#pc" class="text-yellow-500 font-bold hover:underline">Privacy Policy</a>.
                 </span>
               </label>
             </div>
@@ -214,7 +213,7 @@ const renderCheckout = (courseId) => {
             </div>
             <div class="pt-4 border-t border-white/10 flex justify-between">
               <span class="font-black text-lg">Total Due</span>
-              <span class="font-black text-2xl text-indigo-400">${escapeHtml(
+              <span class="font-black text-2xl text-yellow-400">${escapeHtml(
                 formatRM(course.price)
               )}</span>
             </div>
@@ -222,15 +221,15 @@ const renderCheckout = (courseId) => {
 
           <div class="bg-white/5 rounded-2xl p-4 space-y-3">
             <div class="flex items-center space-x-3 text-xs">
-              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
               <span>Lifetime Access</span>
             </div>
             <div class="flex items-center space-x-3 text-xs">
-              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
               <span>All Future Updates</span>
             </div>
             <div class="flex items-center space-x-3 text-xs">
-              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
               <span>Direct Instructor Support</span>
             </div>
           </div>
