@@ -58,8 +58,8 @@ const renderCheckout = (courseId) => {
 
       <div class="space-y-3">
         <a
-          href="#/dashboard"
-          class="w-full inline-flex items-center justify-center gap-3 py-4 rounded-2xl bg-yellow-500 text-white font-black hover:bg-yellow-600 transition-all shadow-xl shadow-yellow-900/20"
+          href="#/signin"
+          class="w-full inline-flex items-center justify-center gap-3 py-4 rounded-2xl bg-yellow-500 text-white font-black hover:bg-yellow-600 transition-all shadow-xl shadow-yellow-100"
         >
           Sign In to Platform
           <span aria-hidden="true">←</span>
