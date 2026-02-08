@@ -30,6 +30,36 @@ const toVideoEmbedUrl = (raw) => {
   return url;
 };
 
+const toSheetsFrameUrls = (raw) => {
+  const url = String(raw || "").trim().replace(/^["']+|["']+$/g, "");
+  if (!url) return { embed: "", open: "" };
+
+  // If it's a normal Sheets URL: /spreadsheets/d/<id>/
+  let m = url.match(/docs\.google\.com\/spreadsheets\/d\/([^/?#]+)/i);
+  if (m) {
+    const id = m[1];
+    return {
+      // Drive preview often looks more "full UI" inside iframe for demo
+      embed: `https://drive.google.com/file/d/${id}/preview`,
+      // Open in new tab to real sheet
+      open: `https://docs.google.com/spreadsheets/d/${id}/edit?usp=sharing`,
+    };
+  }
+
+  // If it's a Drive file link already
+  m = url.match(/drive\.google\.com\/file\/d\/([^/?#]+)/i);
+  if (m) {
+    const id = m[1];
+    return {
+      embed: `https://drive.google.com/file/d/${id}/preview`,
+      open: `https://docs.google.com/spreadsheets/d/${id}/edit?usp=sharing`,
+    };
+  }
+
+  // If it's a published URL (d/e/.../pubhtml) we can't reconstruct the edit URL reliably
+  return { embed: url, open: url };
+};
+
 const isDirectVideoFile = (url) => /\.(mp4|webm|ogg)(\?.*)?$/i.test(String(url || ""));
 
 const renderCourseContent = (courseId) => {
@@ -61,11 +91,18 @@ const renderCourseContent = (courseId) => {
     const selectedEbook =
       course.content.ebooks.find((e) => e.id === cc.selectedEbookId) || null;
     const selectedWorkbook =
-      course.content.workbooks.find((w) => w.id === cc.selectedWorkbookId) || null;
-    const wbKey = `${courseId}:${cc.selectedWorkbookId || ""}`;
-    const wbUrl = cc.workbookSheetUrls && cc.workbookSheetUrls[wbKey] ? cc.workbookSheetUrls[wbKey] : "";
-    const wbLoading = cc.workbookLoadingKey === wbKey;
-    const wbError = cc.workbookError || "";
+      course.content.workbooks.find((w) => w.id === cc.selectedWorkbookId) ||
+      course.content.workbooks[0] ||
+      null;
+    
+    const wbRawUrl = selectedWorkbook ? (selectedWorkbook.embedUrl || selectedWorkbook.url || "") : "";
+    const wbFrame = toSheetsFrameUrls(wbRawUrl);
+
+    // Use this for iframe src
+    const wbEmbedUrl = wbFrame.embed || "";
+
+    // Use this for "Open in New Tab"
+    const wbOpenUrl = wbFrame.open || wbRawUrl;
 
     return `
 <div id="course-content-root" class="bg-white min-h-screen flex flex-col">
@@ -358,101 +395,131 @@ const renderCourseContent = (courseId) => {
         ${
           activeTab === "workbook" && selectedWorkbook
             ? `
-        <div class="flex-grow flex flex-col">
-          <div class="flex-grow bg-white border-b border-slate-100">
-            ${
-              wbLoading
-                ? `
-              <div class="h-full min-h-[500px] flex flex-col items-center justify-center p-16 text-center">
-                <div class="w-14 h-14 rounded-2xl bg-yellow-50 border border-yellow-100 flex items-center justify-center mb-5">
-                  <svg class="w-7 h-7 text-yellow-500 animate-spin" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"></circle>
-                    <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4" stroke-linecap="round"></path>
-                  </svg>
-                </div>
-                <h2 class="text-xl font-black text-slate-900 mb-2">Preparing your workbook…</h2>
-                <p class="text-slate-500 max-w-md">Sistem tengah create Google Sheet copy untuk akaun kau & share sebagai editor.</p>
-              </div>
-              `
-                : wbError
-                ? `
-              <div class="h-full min-h-[500px] flex flex-col items-center justify-center p-16 text-center">
-                <div class="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mb-5">
-                  <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M12 2a10 10 0 100 20 10 10 0 000-20z"></path>
-                  </svg>
-                </div>
-                <h2 class="text-xl font-black text-slate-900 mb-2">Workbook failed</h2>
-                <p class="text-slate-500 max-w-md">${escapeHtml(wbError)}</p>
-                <button data-action="workbook-ensure" class="mt-6 px-8 py-4 bg-yellow-500 text-white font-black rounded-2xl hover:bg-yellow-600 shadow-lg shadow-yellow-100 transition active:scale-95">
-                  Try Again
-                </button>
-              </div>
-              `
-                : wbUrl
-                ? `
-              <iframe data-scroll-lock="worksheet" src="${escapeHtml(
-                wbUrl
-              )}" class="w-full h-full min-h-[500px] border-none touch-auto" title="${escapeHtml(
-                selectedWorkbook.title
-              )}"></iframe>
-              `
-                : `
-              <div class="h-full min-h-[500px] flex flex-col items-center justify-center p-16 text-center">
-                <div class="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-5">
-                  <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                  </svg>
-                </div>
-                <h2 class="text-xl font-black text-slate-900 mb-2">Workbook belum disediakan</h2>
-                <p class="text-slate-500 max-w-md">Klik Prepare untuk create Google Sheet copy ikut workbook ni.</p>
-                <button data-action="workbook-ensure" class="mt-6 px-8 py-4 bg-yellow-500 text-white font-black rounded-2xl hover:bg-yellow-600 shadow-lg shadow-yellow-100 transition active:scale-95">
-                  Prepare Workbook
-                </button>
-              </div>
-              `
-            }
-          </div>
-
-          <div class="p-8 bg-yellow-50 border-t border-yellow-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="flex-1">
-              <h3 class="text-lg font-bold text-yellow-900 mb-1">${escapeHtml(
-                selectedWorkbook.title
-              )}</h3>
-              <p class="text-yellow-700 text-sm">
-                If you can’t edit inside the iframe (your browser is blocking cookies), click “Open in Google Sheets”.
-              </p>
-            </div>
-
-            <div class="grid grid-cols-2 lg:grid-cols-1 gap-3 w-full max-w-xl lg:max-w-sm ml-auto">
+          <div class="flex-grow flex flex-col">
+            <div class="flex-grow bg-white border-b border-slate-100">
               ${
-                wbUrl
-                  ? `<a target="_blank" href="${escapeHtml(wbUrl).replace("?rm=minimal","")}" class="w-full px-4 py-3 rounded-xl font-black text-sm bg-white text-yellow-700 border border-yellow-200 hover:border-yellow-500 transition text-center flex items-center justify-center">Open in Google Sheets</a>`
-                  : `<button data-action="workbook-ensure" class="px-6 py-3 rounded-xl font-black text-sm bg-white text-yellow-700 border border-yellow-200 hover:border-yellow-500 transition">Prepare</button>`
-              }
+                wbEmbedUrl
+                  ? `
+                <div class="h-full min-h-[500px] flex flex-col">
+                  
+                  <!-- Fake "Google Sheets" top chrome -->
+                  <div class="bg-white border-b border-slate-200 px-4 sm:px-6 py-3">
+                    <div class="flex items-center justify-between gap-4">
+                      
+                      <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-emerald-600">
+                            <path d="M6 2h9l3 3v17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2"/>
+                            <path d="M15 2v4h4" stroke="currentColor" stroke-width="2"/>
+                            <path d="M8 10h8M8 14h8M8 18h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                          </svg>
+                        </div>
 
-              <button data-action="content-toggle" data-type="workbooks" data-id="${escapeHtml(
-                selectedWorkbook.id
-              )}" class="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-xl font-black text-sm transition-all ${
-                isCompleted("workbooks", selectedWorkbook.id)
-                  ? "bg-emerald-600 text-white shadow-lg shadow-emerald-100"
-                  : "bg-white text-yellow-600 border border-yellow-200 hover:border-yellow-600"
-              }">
-                ${
-                  isCompleted("workbooks", selectedWorkbook.id)
-                    ? `
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Completed</span>
+                        <div class="min-w-0">
+                          <div class="font-bold text-slate-900 truncate">${escapeHtml(selectedWorkbook.title)}</div>
+                          <div class="text-[10px] text-slate-400 font-black uppercase tracking-widest">
+                            View only • Demo preview
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="flex items-center gap-2 shrink-0">
+                        <span class="hidden sm:inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">
+                          View only
+                        </span>
+
+                        <a
+                          target="_blank"
+                          rel="noopener"
+                          href="${escapeHtml(wbOpenUrl)}"
+                          class="inline-flex items-center justify-center px-4 py-2 rounded-xl font-black text-xs bg-white text-slate-700 border border-slate-200 hover:border-slate-400 transition"
+                        >
+                          Open
+                        </a>
+                      </div>
+                    </div>
+
+                    <div class="mt-3 hidden md:flex items-center gap-4 text-xs font-bold text-slate-500">
+                      <span class="hover:text-slate-900 cursor-default">File</span>
+                      <span class="hover:text-slate-900 cursor-default">Edit</span>
+                      <span class="hover:text-slate-900 cursor-default">View</span>
+                      <span class="hover:text-slate-900 cursor-default">Insert</span>
+                      <span class="hover:text-slate-900 cursor-default">Format</span>
+                      <span class="hover:text-slate-900 cursor-default">Data</span>
+                      <span class="hover:text-slate-900 cursor-default">Tools</span>
+                    </div>
+                  </div>
+
+                  <!-- Actual embed -->
+                  <div class="flex-1 min-h-0">
+                    <iframe
+                      data-scroll-lock="worksheet"
+                      src="${escapeHtml(wbEmbedUrl)}"
+                      class="w-full h-full min-h-[500px] border-none"
+                      title="${escapeHtml(selectedWorkbook.title)}"
+                      loading="lazy"
+                      referrerpolicy="no-referrer-when-downgrade"
+                    ></iframe>
+                  </div>
+                </div>
                 `
-                    : `<span>Mark as Complete</span>`
-                }
-              </button>
+                  : `
+                <div class="h-full min-h-[500px] flex flex-col items-center justify-center p-16 text-center">
+                  <div class="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-5">
+                    <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                  </div>
+                  <h2 class="text-xl font-black text-slate-900 mb-2">Workbook URL is missing</h2>
+                  <p class="text-slate-500 max-w-md">Please set workbook.url or workbook.embedUrl in the course data.</p>
+                </div>
+                `
+              }
+            </div>
+
+            <div class="p-8 bg-yellow-50 border-t border-yellow-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div class="flex-1">
+                <h3 class="text-lg font-bold text-yellow-900 mb-1">${escapeHtml(selectedWorkbook.title)}</h3>
+                <p class="text-yellow-700 text-sm">
+                  This is an embedded preview. If your browser blocks cookies and you can’t interact, open it in a new tab.
+                </p>
+              </div>
+
+              <div class="grid grid-cols-2 lg:grid-cols-1 gap-3 w-full max-w-xl lg:max-w-sm ml-auto">
+                <a
+                  target="_blank"
+                  rel="noopener"
+                  href="${escapeHtml(wbRawUrl || wbEmbedUrl)}"
+                  class="w-full px-4 py-3 rounded-xl font-black text-sm bg-white text-yellow-700 border border-yellow-200 hover:border-yellow-500 transition text-center flex items-center justify-center"
+                >
+                  Open in Google Sheets
+                </a>
+
+                <button
+                  data-action="content-toggle"
+                  data-type="workbooks"
+                  data-id="${escapeHtml(selectedWorkbook.id)}"
+                  class="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-xl font-black text-sm transition-all ${
+                    isCompleted("workbooks", selectedWorkbook.id)
+                      ? "bg-emerald-600 text-white shadow-lg shadow-emerald-100"
+                      : "bg-white text-yellow-600 border border-yellow-200 hover:border-yellow-600"
+                  }"
+                >
+                  ${
+                    isCompleted("workbooks", selectedWorkbook.id)
+                      ? `
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Completed</span>
+                  `
+                      : `<span>Mark as Complete</span>`
+                  }
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-        `
+          `
             : ""
         }
 
@@ -478,7 +545,7 @@ const renderCourseContent = (courseId) => {
 
       <div class="mt-6 text-center">
         <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">
-          &copy; SDC E-LEARNING CONTENT PROTECTION ACTIVE | USER: ${escapeHtml(
+          &copy; DEMO E-LEARNING CONTENT PROTECTION ACTIVE | USER: ${escapeHtml(
             user.id
           )} | DO NOT SHARE CREDENTIALS
         </p>
