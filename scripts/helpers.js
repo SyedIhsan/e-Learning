@@ -230,8 +230,6 @@ export const initCourseContent = (courseId) => {
     }
   };
 
-const PROGRESS_SAVE_URL = new URL("../api/progress/save.php", import.meta.url).toString();
-
 const mapContentType = (type) => {
   if (type === "videos") return "video";
   if (type === "ebooks") return "ebook";
@@ -257,25 +255,6 @@ export const toggleCompletion = (type, itemId) => {
       `sdc_course_progress_${user.id}_${courseId}`,
       JSON.stringify(cc.completion)
     );
-
-    // ✅ Sync to server (fire-and-forget)
-    fetch(PROGRESS_SAVE_URL, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        course_id: courseId,
-        content_type: mapContentType(type), // video | ebook | workbook
-        content_id: String(itemId),
-        completed: completed,
-      }),
-      keepalive: true, // optional: helps if user quickly leaves page
-    })
-      .then((r) => r.json().catch(() => null))
-      .then((res) => {
-        if (!res || res.ok !== true) console.warn("progress save failed:", res);
-      })
-      .catch((err) => console.warn("progress save error:", err));
   }
 };
 

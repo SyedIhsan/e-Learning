@@ -148,7 +148,7 @@ const renderHelpCenter = () => {
                 </div>
                 <h4 class="text-white font-bold text-lg mb-2">Email Desk</h4>
                 <p class="text-slate-400 text-sm mb-6">Business hours response</p>
-                <a href="mailto:support@sdc.cx" class="text-amber-500 font-black hover:text-amber-400 transition-colors">support@sdc.cx</a>
+                <a href="mailto:demo@test.com" class="text-amber-500 font-black hover:text-amber-400 transition-colors">demo@test.com</a>
               </div>
 
               <div class="p-8 bg-white/5 rounded-3xl border border-white/10 flex flex-col items-center">
@@ -159,7 +159,7 @@ const renderHelpCenter = () => {
                 </div>
                 <h4 class="text-white font-bold text-lg mb-2">WhatsApp Support</h4>
                 <p class="text-slate-400 text-sm mb-6">Fastest response</p>
-                <a target="_blank" rel="noopener noreferrer" href="https://wa.me/601116669604" class="text-amber-500 font-black hover:text-amber-400 transition-colors">Chat on WhatsApp</a>
+                <a target="_blank" rel="noopener noreferrer" href="https://wa.me/60123456789" class="text-amber-500 font-black hover:text-amber-400 transition-colors">Chat on WhatsApp</a>
               </div>
             </div>
           </div>

@@ -39,37 +39,59 @@ const renderCheckout = (courseId) => {
   // Success UI
   if (success) {
     return `
-<div class="min-h-[80vh] flex items-center justify-center bg-slate-50 px-4">
-  <div class="max-w-md w-full bg-white rounded-[3rem] p-12 text-center shadow-2xl shadow-slate-200 border border-slate-100">
-    <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-8">
-      <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-      </svg>
+  <div class="min-h-[80vh] flex items-center justify-center bg-slate-50 px-4 py-16">
+    <div class="w-full max-w-md bg-white rounded-[2.5rem] p-10 text-center shadow-2xl shadow-slate-200 border border-slate-100 relative overflow-hidden">
+
+      <div class="mx-auto w-20 h-20 rounded-[1.5rem] bg-emerald-100 flex items-center justify-center mb-7">
+        <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+
+      <h2 class="text-4xl font-black tracking-tight text-slate-900 leading-tight mb-4">
+        Enrollment <span class="text-yellow-500">Confirmed!</span>
+      </h2>
+
+      <p class="text-slate-500 leading-relaxed mb-10">
+        Success! Your learning path has been unlocked. We've sent your access credentials to your email address.
+      </p>
+
+      <div class="space-y-3">
+        <a
+          href="#/dashboard"
+          class="w-full inline-flex items-center justify-center gap-3 py-4 rounded-2xl bg-yellow-500 text-white font-black hover:bg-yellow-600 transition-all shadow-xl shadow-yellow-900/20"
+        >
+          Sign In to Platform
+          <span aria-hidden="true">←</span>
+        </a>
+
+        <a
+          href="#/"
+          class="w-full inline-flex items-center justify-center py-4 rounded-2xl bg-white border border-slate-200 text-slate-700 font-bold hover:bg-slate-50 transition-all"
+        >
+          Return Home
+        </a>
+      </div>
+
+      <p class="mt-10 text-[10px] uppercase tracking-[0.2em] font-black text-slate-400">
+        Digital product delivery guaranteed by DEMO e-learning
+      </p>
+
+      <!-- soft corner blobs (optional aesthetic) -->
+      <div class="absolute -top-10 -left-10 w-28 h-28 bg-yellow-100 rounded-full opacity-60"></div>
+      <div class="absolute -bottom-10 -right-10 w-28 h-28 bg-emerald-100 rounded-full opacity-60"></div>
     </div>
-    <h2 class="text-3xl font-black text-slate-900 mb-4">Enrollment Complete!</h2>
-    <p class="text-slate-500 mb-10 leading-relaxed">
-      Congratulations! You now have lifetime access to <span class="font-bold text-slate-900">${escapeHtml(
-        course.title
-      )}</span>. Your access credentials have been sent to your email.
-    </p>
-    <a
-      href="#/dashboard"
-      class="block w-full py-5 bg-yellow-600 text-white rounded-2xl font-black text-lg hover:bg-yellow-700 shadow-xl shadow-yellow-100 transition-all"
-    >
-      Go to Dashboard
-    </a>
   </div>
-</div>
-`;
+  `;
   }
 
   const agreed = !!formData.agreedTerms;
 
   const btnClass = processing
-    ? "bg-yellow-400 text-white cursor-wait"
+    ? "bg-yellow-400/80 text-white cursor-wait shadow-lg shadow-yellow-200/60"
     : !agreed
     ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
-    : "bg-yellow-500 text-white hover:bg-yellow-600 hover:scale-[1.02] shadow-yellow-100 active:scale-95";
+    : "bg-yellow-500 text-white hover:bg-yellow-600 hover:scale-[1.02] shadow-xl shadow-yellow-200/60 active:scale-95";
 
   return `
 <div class="bg-slate-50 min-h-screen py-16">
@@ -139,7 +161,8 @@ const renderCheckout = (courseId) => {
                   </svg>
                 </div>
                 <span class="text-sm text-slate-600 font-medium leading-relaxed group-hover:text-slate-900 transition-colors">
-                  I certify that I am at least 18 years old and that I agree to the <a href="../../policy.html#rc" class="text-yellow-500 font-bold hover:underline">Terms &amp; Conditions</a> and <a href="../../policy.html#pc" class="text-yellow-500 font-bold hover:underline">Privacy Policy</a>.
+                  I certify that I am at least 18 years old and that I agree to the <a 
+                  href="#/terms" class="text-yellow-500 font-bold hover:underline">Terms &amp; Conditions</a> and <a href="#/privacy" class="text-yellow-500 font-bold hover:underline">Privacy Policy</a>.
                 </span>
               </label>
             </div>
@@ -163,18 +186,6 @@ const renderCheckout = (courseId) => {
                   : `<span>Complete Enrollment - ${escapeHtml(formatRM(course.price))}</span>`
               }
             </button>
-            
-            ${SHOW_SANDBOX ? `
-            <button
-              type="submit"
-              name="pay_mode"
-              value="sandbox"
-              ${processing || !agreed ? "disabled" : ""}
-              class="w-full py-4 rounded-2xl font-black text-sm shadow-lg transition-all flex items-center justify-center bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Test Sandbox Payment - ${escapeHtml(formatRM(course.price))}
-            </button>
-            ` : ""}
 
             <p class="text-center text-[10px] text-slate-400 uppercase tracking-widest font-black">
               🛡️ Secure Digital Enrollment &amp; Content Protection

@@ -10,12 +10,15 @@ import renderCourseContent from "./courseContent.js";
 import renderDashboard from "./dashboard.js";
 import renderHelpCenter from "./helpCenter.js";
 import renderInstructors from "./instructors.js";
+import renderEnterprise from "./enterprise.js";
 import renderSignIn from "./signIn.js";
 import renderCheckout from "./checkout.js";
 import renderForgotPassword from "./forgotPassword.js";
 import renderChangePassword from "./changePassword.js";
 
 import { resetPageStatesOnRoute } from "./helpers.js";
+import renderPrivacy from "./privacy.js";
+import renderTerms from "./terms.js";
 import renderNotFound from "./notFound.js";
 
 const $app = () => document.getElementById("app");
@@ -108,6 +111,7 @@ export const renderRoute = (path) => {
   if (path === "/dashboard") return renderDashboard();
   if (path === "/help") return renderHelpCenter();
   if (path === "/instructors") return renderInstructors();
+  if (path === "/enterprise") return renderEnterprise();
 
   // Auth
   if (path === "/signin") return renderSignIn();
@@ -119,6 +123,9 @@ export const renderRoute = (path) => {
     const courseId = decodeURIComponent(path.replace("/checkout/", ""));
     return renderCheckout(courseId);
   }
+
+  if (path === "/privacy") return renderPrivacy();
+  if (path === "/terms") return renderTerms();
 
   // 404
   return renderNotFound();

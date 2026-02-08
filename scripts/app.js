@@ -7,15 +7,10 @@ import STATE from "./state.js";
 import { COURSES, loadCoursesFromDB } from "../data/course.js";
 import {
   navigate,
-  getPurchasedList,
   handleLogout,
-  handleLogin,
   toggleCompletion,
   loadUserFromStorage,
 } from "./helpers.js";
-
-const WORKBOOK_API_URL = new URL("../api/ensure_workbook.php", import.meta.url).toString();
-const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toString();
 
 (async function () {
   "use strict";
@@ -66,52 +61,23 @@ const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toStr
   }
 
   // Workbook: create/reuse per-user Google Sheet on demand (when Workbook tab clicked)
-  const ensureWorkbookForSelection = async () => {
-    try {
-      const user = STATE.user;
-      const courseId = STATE.courseContent.courseId;
-      const workbookId = STATE.courseContent.selectedWorkbookId;
-      if (!user || !courseId || !workbookId) return;
+  const ensureWorkbookForSelection = () => {
+    const cc = STATE.courseContent;
+    const course = COURSES[cc.courseId];
+    const wb = course?.content?.workbooks?.find(w => w.id === cc.selectedWorkbookId);
 
-      const key = `${courseId}:${workbookId}`;
-      if (STATE.courseContent.workbookSheetUrls?.[key]) return;
+    const key = `${cc.courseId}:${cc.selectedWorkbookId}`;
+    const raw = wb?.embedUrl || wb?.url || "";
+    const url = String(raw || "").replace(/\/edit(\?.*)?$/i, "/preview");
 
-      const email = (user.email || "").trim();
-      if (!email) {
-        STATE.courseContent.workbookError = "The user email is empty. Please sign in again using the purchase email.";
-        render();
-        return;
-      }
+    cc.workbookSheetUrls = cc.workbookSheetUrls || {};
+    cc.workbookLoadingKey = null;
 
-      STATE.courseContent.workbookLoadingKey = key;
-      STATE.courseContent.workbookError = "";
-      render();
+    if (!url) { cc.workbookError = "Workbook URL not set."; render(); return; }
 
-      const resp = await fetch(WORKBOOK_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          course_id: courseId,
-          workbook_id: workbookId,
-          user_id: user.id,
-          user_email: email,
-        }),
-      });
-
-      const txt = await resp.text();
-      let data;
-      try { data = JSON.parse(txt); } catch { data = { error: txt || "Invalid response" }; }
-
-      if (!resp.ok || !data?.embed_url) throw new Error(data?.error || "Failed to prepare workbook.");
-
-      STATE.courseContent.workbookSheetUrls = STATE.courseContent.workbookSheetUrls || {};
-      STATE.courseContent.workbookSheetUrls[key] = data.embed_url;
-    } catch (err) {
-      STATE.courseContent.workbookError = err?.message || "Workbook error.";
-    } finally {
-      STATE.courseContent.workbookLoadingKey = null;
-      render();
-    }
+    cc.workbookError = "";
+    cc.workbookSheetUrls[key] = url;
+    render();
   };
 
   const goNextVideo = (currentId) => {
@@ -195,7 +161,7 @@ const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toStr
     true // capture mode: intercept sebelum benda lain
   );
 
-  document.addEventListener("submit", async (e) => {
+  document.addEventListener("submit", (e) => {
     const form = e.target?.closest?.('form[data-action="footer-subscribe-form"]');
     if (!form) return;
 
@@ -208,41 +174,101 @@ const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toStr
     const msg = form.querySelector('[data-role="footer-subscribe-msg"]');
 
     const email = (input?.value || "").trim();
-    if (!email) return;
+    if (!email || !btn || !input) return;
 
-    const levels = ["beginner", "intermediate", "advanced"];
+    // Prevent spam click while loading/success (React behaviour)
+    const current = form.dataset.subStatus || "idle";
+    if (current !== "idle") return;
+
+    // Optional: simple email check (reportValidity dah buat basic check)
+    const okEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!okEmail) {
+      if (msg) {
+        msg.classList.remove("hidden");
+        msg.className = "text-xs text-center text-rose-300";
+        msg.textContent = "Email tak valid. Cuba lagi.";
+      }
+      return;
+    }
+
+    // Save original UI once (so we can restore)
+    if (!btn.dataset.baseHtml) btn.dataset.baseHtml = btn.innerHTML;
+    if (!btn.dataset.baseClass) btn.dataset.baseClass = btn.className;
+    if (!input.dataset.baseClass) input.dataset.baseClass = input.className;
 
     const setMsg = (text, ok = true) => {
       if (!msg) return;
       msg.classList.remove("hidden");
-      msg.textContent = text;
       msg.className = `text-xs text-center ${ok ? "text-emerald-300" : "text-rose-300"}`;
+      msg.textContent = text;
     };
 
-    try {
-      if (btn) { btn.disabled = true; btn.textContent = "SUBSCRIBING..."; }
-      if (input) input.disabled = true;
+    const setStatus = (status) => {
+      form.dataset.subStatus = status;
 
-      await Promise.all(
-        levels.map(async (level) => {
-          const res = await fetch("/e-Learning/api/waitlist_subscribe.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, level }),
-          });
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok || !data.ok) throw new Error(data.error || `Subscribe failed (${level})`);
-        })
-      );
+      // disable input/button bila bukan idle
+      const disabled = status !== "idle";
+      input.disabled = disabled;
+      btn.disabled = disabled;
 
-      setMsg("Subscribed! You’ll get notified for any new course.", true);
-      if (input) input.value = "";
-    } catch (err) {
-      setMsg(err?.message || "Something went wrong. Try again.", false);
-    } finally {
-      if (btn) { btn.disabled = false; btn.textContent = "SUBSCRIBE NOW"; }
-      if (input) input.disabled = false;
-    }
+      if (status === "idle") {
+        // restore default
+        btn.className = btn.dataset.baseClass;
+        btn.innerHTML = btn.dataset.baseHtml || "SUBSCRIBE NOW";
+        // optional: hide msg balik
+        if (msg) msg.classList.add("hidden");
+        return;
+      }
+
+      if (status === "loading") {
+        // loading spinner + text
+        btn.className =
+          "w-full h-12 rounded-2xl bg-white text-slate-900 font-black text-sm tracking-widest uppercase transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-900/20 opacity-90 cursor-not-allowed";
+        btn.innerHTML = `
+          <svg class="animate-spin h-4 w-4 text-slate-900" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>SUBSCRIBING...</span>
+        `;
+        return;
+      }
+
+      if (status === "success") {
+        btn.className =
+          "w-full h-12 rounded-2xl bg-emerald-500 text-white font-black text-sm tracking-widest uppercase transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20";
+        btn.innerHTML = `
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+          </svg>
+          <span>Subscribed!</span>
+        `;
+        return;
+      }
+    };
+
+    // Start: loading
+    setStatus("loading");
+
+    // Simulate API call (React: 1500ms)
+    setTimeout(() => {
+      // DEMO: store local
+      const key = "demo_footer_subscribers";
+      const list = JSON.parse(localStorage.getItem(key) || "[]");
+      const lower = email.toLowerCase();
+      if (!list.includes(lower)) list.push(lower);
+      localStorage.setItem(key, JSON.stringify(list));
+
+      // Success
+      setStatus("success");
+      input.value = "";
+      setMsg("Subscribed! You’ll get notified about new courses.", true);
+
+      // Reset back to idle after 3 seconds
+      setTimeout(() => {
+        setStatus("idle");
+      }, 3000);
+    }, 1500);
   });
 
   document.addEventListener("submit", async (e) => {
@@ -270,20 +296,20 @@ const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toStr
     render();
 
     try {
-      const res = await fetch("/e-Learning/api/waitlist_subscribe.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, level }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.ok) throw new Error(data.error || "Request failed");
+      await new Promise((r) => setTimeout(r, 700));
+
+      const key = `demo_waitlist_${level || "unknown"}`;
+      const list = JSON.parse(localStorage.getItem(key) || "[]");
+      const lower = email.toLowerCase();
+      if (!list.includes(lower)) list.push(lower);
+      localStorage.setItem(key, JSON.stringify(list));
 
       wl.isNotifying = false;
       wl.isNotified = true;
       render();
     } catch (err) {
       wl.isNotifying = false;
-      wl.error = err?.message || "Something went wrong";
+      wl.error = "Something went wrong";
       render();
     }
   });
@@ -467,23 +493,13 @@ const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toStr
     const action = form.getAttribute("data-action");
     if (!action) return;
 
-    // endpoints (match your api/auth folder)
-    const AUTH_LOGIN_URL  = new URL("../api/auth/login.php", import.meta.url).toString();
-    const AUTH_FORGOT_URL = new URL("../api/auth/forgot_password.php", import.meta.url).toString();
-    const AUTH_RESET_URL  = new URL("../api/auth/reset_password.php", import.meta.url).toString();
-    const AUTH_CHANGE_URL = new URL("../api/auth/change_password.php", import.meta.url).toString();
-
     // ===== Checkout submit =====
     if (action === "checkout-submit") {
       e.preventDefault();
 
       const co = STATE.checkout;
       const courseId = co.courseId;
-      if (!courseId || !COURSES[courseId]) {
-        navigate("/");
-        render();
-        return;
-      }
+      if (!courseId || !COURSES[courseId]) { navigate("/"); render(); return; }
 
       const fullName = String(co.formData?.fullName || "").trim();
       const email = String(co.formData?.email || "").trim();
@@ -492,39 +508,28 @@ const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toStr
 
       if (!fullName || !email || !phoneNumber || !agreedTerms || co.processing) return;
 
-      const submitter = e.submitter || document.activeElement;
-
-      let payMode = "live";
-      if (submitter && submitter.getAttribute) {
-        const n = submitter.getAttribute("name");
-        if (n === "pay_mode") {
-          payMode = submitter.getAttribute("value") || submitter.value || "live";
-        }
-      }
-
       co.processing = true;
+      co.success = false; // reset kalau user back & submit lagi
       render();
-       
-      const startUrl =
-        payMode === "sandbox"
-          ? `${START_PAYMENT_URL}${START_PAYMENT_URL.includes("?") ? "&" : "?"}sandbox=1`
-          : START_PAYMENT_URL;
-      
-      const f = document.createElement("form");
-      f.method = "POST";
-      f.action = startUrl;
 
-      const payload = { course_id: courseId, name: fullName, email, phone: phoneNumber };
-      for (const [k, v] of Object.entries(payload)) {
-        const i = document.createElement("input");
-        i.type = "hidden";
-        i.name = k;
-        i.value = v;
-        f.appendChild(i);
-      }
+      // ✅ simulate payment processing
+      setTimeout(() => {
+        const userId = (email || `STUDENT-${Math.floor(1000 + Math.random() * 9000)}`).toLowerCase();
+        localStorage.setItem("sdc_user", userId);
+        localStorage.setItem("sdc_user_email", email);
 
-      document.body.appendChild(f);
-      f.submit();
+        const purchased = JSON.parse(localStorage.getItem("sdc_purchased") || "[]");
+        if (!purchased.includes(courseId)) purchased.push(courseId);
+        localStorage.setItem("sdc_purchased", JSON.stringify(purchased));
+
+        STATE.user = { id: userId, email, purchasedCourses: purchased };
+
+        co.processing = false;
+        co.success = true;
+        window.scrollTo({ top: 0, behavior: "auto" });
+        render();
+      }, 1800); // tukar 1500/2500 ikut taste
+
       return;
     }
 
@@ -534,44 +539,17 @@ const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toStr
 
       const email = (STATE.signIn.email || "").trim();
       const pw = (STATE.signIn.password || "").trim();
+      if (!email || !pw) { STATE.signIn.error = "Isi email & password."; render(); return; }
 
-      if (!email || !pw) {
-        STATE.signIn.error = "Please enter your email and password.";
-        render();
-        return;
-      }
+      const userId = email.toLowerCase();
+      const purchased = JSON.parse(localStorage.getItem("sdc_purchased") || "[]");
 
-      try {
-        const resp = await fetch(AUTH_LOGIN_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password: pw }),
-        });
+      localStorage.setItem("sdc_user", userId);
+      localStorage.setItem("sdc_user_email", email);
 
-        const data = await resp.json().catch(() => ({}));
-        if (!resp.ok || !data?.ok) throw new Error(data?.error || "Login failed.");
-
-        const u = data.user || {};
-        localStorage.setItem("sdc_user", u.id || "");
-        localStorage.setItem("sdc_user_email", u.email || email);
-        localStorage.setItem("sdc_purchased", JSON.stringify(u.purchasedCourses || []));
-
-        STATE.user = {
-          id: u.id || "",
-          email: u.email || email,
-          purchasedCourses: u.purchasedCourses || [],
-          must_change_password: !!u.must_change_password,
-        };
-
-        if (STATE.user.must_change_password) navigate("/change-password");
-        else navigate("/dashboard");
-
-        render();
-      } catch (err) {
-        STATE.signIn.error = err?.message || "Login failed.";
-        render();
-      }
-
+      STATE.user = { id: userId, email, purchasedCourses: purchased, must_change_password: false };
+      navigate("/dashboard");
+      render();
       return;
     }
 
@@ -591,27 +569,10 @@ const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toStr
       STATE.forgotPassword.message = "";
       render();
 
-      try {
-        const res = await fetch(AUTH_FORGOT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        });
-
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok || data.ok === false) {
-          throw new Error(data.error || "Failed to send verification code.");
-        }
-
-        STATE.forgotPassword.stage = "reset";
-        STATE.forgotPassword.message = "Verification code sent. Please check your email.";
-      } catch (err) {
-        STATE.forgotPassword.error = err?.message || "Request failed.";
-      } finally {
-        STATE.forgotPassword.loading = false;
-        render();
-      }
-
+      STATE.forgotPassword.stage = "reset";
+      STATE.forgotPassword.message = "Verification code sent. (Use: 123456)";
+      STATE.forgotPassword.loading = false;
+      render();
       return;
     }
 
@@ -640,31 +601,22 @@ const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toStr
       STATE.forgotPassword.message = "";
       render();
 
-      try {
-        const res = await fetch(AUTH_RESET_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, code, new_password: p1 }),
-        });
-
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok || data.ok === false) {
-          throw new Error(data.error || "Failed to reset password.");
-        }
-
-        STATE.forgotPassword.stage = "request";
-        STATE.forgotPassword.code = "";
-        STATE.forgotPassword.newPassword = "";
-        STATE.forgotPassword.confirmPassword = "";
-        STATE.forgotPassword.message = "Password updated. Please sign in.";
-        navigate("/signin");
-      } catch (err) {
-        STATE.forgotPassword.error = err?.message || "Reset failed.";
-      } finally {
+      if (code !== "123456") {
         STATE.forgotPassword.loading = false;
+        STATE.forgotPassword.error = "Invalid code. Try 123456.";
         render();
+        return;
       }
 
+      STATE.forgotPassword.stage = "request";
+      STATE.forgotPassword.code = "";
+      STATE.forgotPassword.newPassword = "";
+      STATE.forgotPassword.confirmPassword = "";
+      STATE.forgotPassword.message = "Password updated. Please sign in.";
+      STATE.forgotPassword.loading = false;
+
+      navigate("/signin");
+      render();
       return;
     }
 
@@ -699,33 +651,16 @@ const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toStr
       STATE.changePassword.message = "";
       render();
 
-      try {
-        const res = await fetch(AUTH_CHANGE_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, current_password: current, new_password: p1 }),
-        });
+      STATE.user.must_change_password = false;
 
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok || data.ok === false) {
-          throw new Error(data.error || "Failed to update password.");
-        }
+      STATE.changePassword.currentPassword = "";
+      STATE.changePassword.newPassword = "";
+      STATE.changePassword.confirmPassword = "";
+      STATE.changePassword.message = "Password updated successfully.";
+      STATE.changePassword.loading = false;
 
-        STATE.user.must_change_password = false;
-
-        STATE.changePassword.currentPassword = "";
-        STATE.changePassword.newPassword = "";
-        STATE.changePassword.confirmPassword = "";
-        STATE.changePassword.message = "Password updated successfully.";
-
-        navigate("/dashboard");
-      } catch (err) {
-        STATE.changePassword.error = err?.message || "Update failed.";
-      } finally {
-        STATE.changePassword.loading = false;
-        render();
-      }
-
+      navigate("/dashboard");
+      render();
       return;
     }
   });
@@ -880,7 +815,7 @@ const START_PAYMENT_URL = new URL("../payment/start.php", import.meta.url).toStr
   loadUserFromStorage();
 
   try {
-    // load courses from DB (so admin-added courses appear here)
+    // load courses (DEMO/static)
     await loadCoursesFromDB();
   } catch (e) {
     console.error("Failed to load courses from DB:", e);
