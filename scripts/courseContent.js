@@ -30,34 +30,39 @@ const toVideoEmbedUrl = (raw) => {
   return url;
 };
 
-const toSheetsFrameUrls = (raw) => {
-  const url = String(raw || "").trim().replace(/^["']+|["']+$/g, "");
-  if (!url) return { embed: "", open: "" };
+const buildWorkbookUrls = (rawUrl) => {
+  const url = String(rawUrl || "").trim().replace(/^["']+|["']+$/g, "");
+  if (!url) return { embedUrl: "", openUrl: "" };
 
-  // If it's a normal Sheets URL: /spreadsheets/d/<id>/
-  let m = url.match(/docs\.google\.com\/spreadsheets\/d\/([^/?#]+)/i);
-  if (m) {
-    const id = m[1];
-    return {
-      // Drive preview often looks more "full UI" inside iframe for demo
-      embed: `https://drive.google.com/file/d/${id}/preview`,
-      // Open in new tab to real sheet
-      open: `https://docs.google.com/spreadsheets/d/${id}/edit?usp=sharing`,
-    };
+  // If this is a "Published to web" URL (2PACX...), you cannot convert it back to /edit reliably.
+  // Keep it as-is (it will stay in lightweight embed mode).
+  if (/\/spreadsheets\/d\/e\/.+\/pubhtml/i.test(url)) {
+    return { embedUrl: url, openUrl: url };
   }
 
-  // If it's a Drive file link already
-  m = url.match(/drive\.google\.com\/file\/d\/([^/?#]+)/i);
-  if (m) {
-    const id = m[1];
-    return {
-      embed: `https://drive.google.com/file/d/${id}/preview`,
-      open: `https://docs.google.com/spreadsheets/d/${id}/edit?usp=sharing`,
-    };
-  }
+  // Extract spreadsheet/file ID from common URL formats
+  const idMatch =
+    url.match(/docs\.google\.com\/spreadsheets\/d\/([^/?#]+)/i) ||
+    url.match(/drive\.google\.com\/file\/d\/([^/?#]+)/i) ||
+    url.match(/drive\.google\.com\/open\?id=([^&]+)/i) ||
+    url.match(/[?&]id=([^&]+)/i);
 
-  // If it's a published URL (d/e/.../pubhtml) we can't reconstruct the edit URL reliably
-  return { embed: url, open: url };
+  const fileId = idMatch ? idMatch[1] : "";
+  if (!fileId) return { embedUrl: url, openUrl: url };
+
+  // Preserve the selected sheet tab (gid) if present
+  const gidMatch = url.match(/[#?]gid=([0-9]+)/i);
+  const gid = gidMatch ? gidMatch[1] : "";
+  const gidHash = gid ? `#gid=${gid}` : "";
+
+  // ✅ Full Google Sheets UI inside iframe (closest to your "first image")
+  // rm=minimal keeps it clean but still shows menus/toolbar.
+  const embedUrl = `https://docs.google.com/spreadsheets/d/${fileId}/edit?rm=minimal&usp=sharing${gidHash}`;
+
+  // ✅ Open the real sheet in a new tab
+  const openUrl = `https://docs.google.com/spreadsheets/d/${fileId}/edit?usp=sharing${gidHash}`;
+
+  return { embedUrl, openUrl };
 };
 
 const isDirectVideoFile = (url) => /\.(mp4|webm|ogg)(\?.*)?$/i.test(String(url || ""));
@@ -95,14 +100,13 @@ const renderCourseContent = (courseId) => {
       course.content.workbooks[0] ||
       null;
     
-    const wbRawUrl = selectedWorkbook ? (selectedWorkbook.embedUrl || selectedWorkbook.url || "") : "";
-    const wbFrame = toSheetsFrameUrls(wbRawUrl);
+    const wbRawUrl = selectedWorkbook
+      ? (selectedWorkbook.embedUrl || selectedWorkbook.url || "")
+      : "";
 
-    // Use this for iframe src
-    const wbEmbedUrl = wbFrame.embed || "";
-
-    // Use this for "Open in New Tab"
-    const wbOpenUrl = wbFrame.open || wbRawUrl;
+    const workbookUrls = buildWorkbookUrls(wbRawUrl);
+    const wbEmbedUrl = workbookUrls.embedUrl;
+    const wbOpenUrl = workbookUrls.openUrl;
 
     return `
 <div id="course-content-root" class="bg-white min-h-screen flex flex-col">
@@ -400,68 +404,13 @@ const renderCourseContent = (courseId) => {
               ${
                 wbEmbedUrl
                   ? `
-                <div class="h-full min-h-[500px] flex flex-col">
-                  
-                  <!-- Fake "Google Sheets" top chrome -->
-                  <div class="bg-white border-b border-slate-200 px-4 sm:px-6 py-3">
-                    <div class="flex items-center justify-between gap-4">
-                      
-                      <div class="flex items-center gap-3 min-w-0">
-                        <div class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0">
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-emerald-600">
-                            <path d="M6 2h9l3 3v17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2"/>
-                            <path d="M15 2v4h4" stroke="currentColor" stroke-width="2"/>
-                            <path d="M8 10h8M8 14h8M8 18h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                          </svg>
-                        </div>
-
-                        <div class="min-w-0">
-                          <div class="font-bold text-slate-900 truncate">${escapeHtml(selectedWorkbook.title)}</div>
-                          <div class="text-[10px] text-slate-400 font-black uppercase tracking-widest">
-                            View only • Demo preview
-                          </div>
-                        </div>
-                      </div>
-
-                      <div class="flex items-center gap-2 shrink-0">
-                        <span class="hidden sm:inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">
-                          View only
-                        </span>
-
-                        <a
-                          target="_blank"
-                          rel="noopener"
-                          href="${escapeHtml(wbOpenUrl)}"
-                          class="inline-flex items-center justify-center px-4 py-2 rounded-xl font-black text-xs bg-white text-slate-700 border border-slate-200 hover:border-slate-400 transition"
-                        >
-                          Open
-                        </a>
-                      </div>
-                    </div>
-
-                    <div class="mt-3 hidden md:flex items-center gap-4 text-xs font-bold text-slate-500">
-                      <span class="hover:text-slate-900 cursor-default">File</span>
-                      <span class="hover:text-slate-900 cursor-default">Edit</span>
-                      <span class="hover:text-slate-900 cursor-default">View</span>
-                      <span class="hover:text-slate-900 cursor-default">Insert</span>
-                      <span class="hover:text-slate-900 cursor-default">Format</span>
-                      <span class="hover:text-slate-900 cursor-default">Data</span>
-                      <span class="hover:text-slate-900 cursor-default">Tools</span>
-                    </div>
-                  </div>
-
-                  <!-- Actual embed -->
-                  <div class="flex-1 min-h-0">
-                    <iframe
-                      data-scroll-lock="worksheet"
-                      src="${escapeHtml(wbEmbedUrl)}"
-                      class="w-full h-full min-h-[500px] border-none"
-                      title="${escapeHtml(selectedWorkbook.title)}"
-                      loading="lazy"
-                      referrerpolicy="no-referrer-when-downgrade"
-                    ></iframe>
-                  </div>
-                </div>
+                <iframe
+                  data-scroll-lock="worksheet"
+                  src="${escapeHtml(wbEmbedUrl)}"
+                  class="w-full h-full min-h-[500px] border-none"
+                  title="${escapeHtml(selectedWorkbook.title)}"
+                  loading="lazy"
+                ></iframe>
                 `
                   : `
                 <div class="h-full min-h-[500px] flex flex-col items-center justify-center p-16 text-center">
@@ -471,7 +420,7 @@ const renderCourseContent = (courseId) => {
                     </svg>
                   </div>
                   <h2 class="text-xl font-black text-slate-900 mb-2">Workbook URL is missing</h2>
-                  <p class="text-slate-500 max-w-md">Please set workbook.url or workbook.embedUrl in the course data.</p>
+                  <p class="text-slate-500 max-w-md">Please set <code class="font-mono">workbook.url</code> or <code class="font-mono">workbook.embedUrl</code> in your course data.</p>
                 </div>
                 `
               }
@@ -481,15 +430,15 @@ const renderCourseContent = (courseId) => {
               <div class="flex-1">
                 <h3 class="text-lg font-bold text-yellow-900 mb-1">${escapeHtml(selectedWorkbook.title)}</h3>
                 <p class="text-yellow-700 text-sm">
-                  This is an embedded preview. If your browser blocks cookies and you can’t interact, open it in a new tab.
+                  This is a preview inside an iframe. If your browser blocks cookies or you can’t interact, open it in a new tab.
                 </p>
               </div>
 
               <div class="grid grid-cols-2 lg:grid-cols-1 gap-3 w-full max-w-xl lg:max-w-sm ml-auto">
                 <a
                   target="_blank"
-                  rel="noopener"
-                  href="${escapeHtml(wbRawUrl || wbEmbedUrl)}"
+                  rel="noopener noreferrer"
+                  href="${escapeHtml(wbOpenUrl)}"
                   class="w-full px-4 py-3 rounded-xl font-black text-sm bg-white text-yellow-700 border border-yellow-200 hover:border-yellow-500 transition text-center flex items-center justify-center"
                 >
                   Open in Google Sheets

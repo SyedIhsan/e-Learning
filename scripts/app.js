@@ -1,7 +1,3 @@
-/* SDC e-Learning (Vanilla HTML/CSS/JS) - ported 1:1 from the provided TSX pages.
-   Routing style: HashRouter (e.g. #/beginner, #/course/beg-101)
-*/
-
 import { render } from "./route.js";
 import STATE from "./state.js";
 import { COURSES, loadCoursesFromDB } from "../data/course.js";
@@ -512,23 +508,29 @@ import {
       co.success = false; // reset kalau user back & submit lagi
       render();
 
-      // ✅ simulate payment processing
+      // simulate payment processing
       setTimeout(() => {
-        const userId = (email || `STUDENT-${Math.floor(1000 + Math.random() * 9000)}`).toLowerCase();
-        localStorage.setItem("sdc_user", userId);
-        localStorage.setItem("sdc_user_email", email);
-
+        // 1) Always store the purchased list (guest-safe)
         const purchased = JSON.parse(localStorage.getItem("sdc_purchased") || "[]");
         if (!purchased.includes(courseId)) purchased.push(courseId);
         localStorage.setItem("sdc_purchased", JSON.stringify(purchased));
 
-        STATE.user = { id: userId, email, purchasedCourses: purchased };
+        // 2) Do NOT auto-login after checkout
+        // Remove/avoid setting "sdc_user" and STATE.user here.
+        // Optionally keep the checkout email for prefilling the sign-in form.
+        localStorage.setItem("sdc_checkout_email", (email || "").toLowerCase());
+
+        // 3) If the user is already logged in (edge case), update their in-memory purchases
+        if (STATE.user) {
+          STATE.user.purchasedCourses = purchased;
+        }
 
         co.processing = false;
         co.success = true;
+
         window.scrollTo({ top: 0, behavior: "auto" });
         render();
-      }, 1800); // tukar 1500/2500 ikut taste
+      }, 1800);
 
       return;
     }

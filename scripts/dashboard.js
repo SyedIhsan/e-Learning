@@ -13,14 +13,31 @@ const renderDashboard = () => {
     const filters = ["All", CourseLevel.BEGINNER, CourseLevel.INTERMEDIATE, CourseLevel.ADVANCED];
     const filter = STATE.dashboard.filter;
 
-    const purchasedCourses = Object.values(COURSES).filter((course) =>
-      user.purchasedCourses.includes(course.id)
-    );
+    const getExploreHref = (currentFilter) => {
+    const f = String(currentFilter || "").toLowerCase();
 
-    const filteredCourses =
-      filter === "All"
-        ? purchasedCourses
-        : purchasedCourses.filter((course) => course.level === filter);
+    // "All" goes to Learning Tracks (change this if your all-tracks route is different)
+    if (f === "all") return "#/beginner";
+
+    // Level-specific tracks
+    if (f.includes("beginner")) return "#/beginner";
+    if (f.includes("intermediate")) return "#/intermediate";
+    if (f.includes("advanced")) return "#/advanced";
+
+    // Fallback
+    return "#/beginner";
+  };
+
+  const exploreHref = getExploreHref(filter);
+
+  const purchasedCourses = Object.values(COURSES).filter((course) =>
+    user.purchasedCourses.includes(course.id)
+  );
+
+  const filteredCourses =
+    filter === "All"
+      ? purchasedCourses
+      : purchasedCourses.filter((course) => course.level === filter);
 
     return `
 <div class="bg-slate-50 min-h-screen py-16 overflow-x-hidden">
@@ -106,7 +123,9 @@ const renderDashboard = () => {
           ? "Purchase your first course to unlock exclusive videos, ebooks, and workbooks."
           : `You haven't enrolled in any ${escapeHtml(String(filter).toLowerCase())} tracks yet.`
       }</p>
-      <a href="#/" class="inline-block px-8 py-4 bg-yellow-500 text-white font-bold rounded-2xl">Explore Courses</a>
+      <a href="${escapeHtml(exploreHref)}" class="inline-block px-8 py-4 bg-yellow-500 text-white font-bold rounded-2xl hover:bg-yellow-600 transition-all">
+        Explore Courses
+      </a>
     </div>
     `
     }
