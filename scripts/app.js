@@ -351,6 +351,22 @@ import {
       return;
     }
 
+    if (action === "access-product") {
+      e.preventDefault();
+
+      // optional: refresh state from storage kalau kau nak betul-betul robust
+      // loadUserFromStorage();
+
+      if (STATE.user) {
+        navigate("/dashboard");
+      } else {
+        navigate("/signin");
+      }
+
+      render();
+      return;
+    }
+
     if (action === "nav-toggle") {
       STATE.nav.isMenuOpen = !STATE.nav.isMenuOpen;
       render();

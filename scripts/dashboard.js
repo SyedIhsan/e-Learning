@@ -13,22 +13,24 @@ const renderDashboard = () => {
     const filters = ["All", CourseLevel.BEGINNER, CourseLevel.INTERMEDIATE, CourseLevel.ADVANCED];
     const filter = STATE.dashboard.filter;
 
-    const getExploreHref = (currentFilter) => {
-    const f = String(currentFilter || "").toLowerCase();
+    const getExploreLinkProps = (currentFilter) => {
+      const f = String(currentFilter || "").toLowerCase();
 
-    // "All" goes to Learning Tracks (change this if your all-tracks route is different)
-    if (f === "all") return "#/beginner";
+      // All -> go home + auto scroll to #learning-tracks (same as footer)
+      if (f === "all") {
+        return { href: "#/", scroll: "learning-tracks" };
+      }
 
-    // Level-specific tracks
-    if (f.includes("beginner")) return "#/beginner";
-    if (f.includes("intermediate")) return "#/intermediate";
-    if (f.includes("advanced")) return "#/advanced";
+      // Level-specific tracks
+      if (f.includes("beginner")) return { href: "#/beginner" };
+      if (f.includes("intermediate")) return { href: "#/intermediate" };
+      if (f.includes("advanced")) return { href: "#/advanced" };
 
-    // Fallback
-    return "#/beginner";
-  };
+      // Fallback
+      return { href: "#/" };
+    };
 
-  const exploreHref = getExploreHref(filter);
+    const { href: exploreHref, scroll: exploreScroll } = getExploreLinkProps(filter);
 
   const purchasedCourses = Object.values(COURSES).filter((course) =>
     user.purchasedCourses.includes(course.id)
@@ -123,7 +125,11 @@ const renderDashboard = () => {
           ? "Purchase your first course to unlock exclusive videos, ebooks, and workbooks."
           : `You haven't enrolled in any ${escapeHtml(String(filter).toLowerCase())} tracks yet.`
       }</p>
-      <a href="${escapeHtml(exploreHref)}" class="inline-block px-8 py-4 bg-yellow-500 text-white font-bold rounded-2xl hover:bg-yellow-600 transition-all">
+      <a
+        href="${escapeHtml(exploreHref)}"
+        ${exploreScroll ? `data-scroll="${escapeHtml(exploreScroll)}"` : ""}
+        class="inline-block px-8 py-4 bg-yellow-500 text-white font-bold rounded-2xl"
+      >
         Explore Courses
       </a>
     </div>

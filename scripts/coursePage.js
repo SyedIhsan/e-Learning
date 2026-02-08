@@ -245,7 +245,7 @@ const renderCoursePage = (level) => {
             `
                 : isOwned
                 ? `
-            <a href="#/dashboard" class="flex-[1.5] py-4 sm:h-16 flex items-center justify-center space-x-3 bg-slate-900 text-white rounded-2xl font-black text-lg hover:bg-slate-800 transition-all group shadow-xl">
+            <a href="#/signin" data-action="access-product" class="flex-[1.5] py-4 sm:h-16 flex items-center justify-center space-x-3 bg-slate-900 text-white rounded-2xl font-black text-lg hover:bg-slate-800 transition-all group shadow-xl">
               <span>Access Product</span>
               <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M17 8l4 4m0 0l-4 4m4-4H3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
