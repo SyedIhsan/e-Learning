@@ -38,6 +38,11 @@ const renderCheckout = (courseId) => {
 
   // Success UI
   if (success) {
+    const isLoggedIn = !!user?.id; // user = STATE.user
+
+    const primaryHref = isLoggedIn ? "#/dashboard" : "#/signin";
+    const primaryLabel = isLoggedIn ? "Go to Dashboard" : "Sign In to Platform";
+
     return `
   <div class="min-h-[80vh] flex items-center justify-center bg-slate-50 px-4 py-16">
     <div class="w-full max-w-md bg-white rounded-[2.5rem] p-10 text-center shadow-2xl shadow-slate-200 border border-slate-100 relative overflow-hidden">
@@ -58,11 +63,10 @@ const renderCheckout = (courseId) => {
 
       <div class="space-y-3">
         <a
-          href="#/signin"
+          href="${primaryHref}"
           class="w-full inline-flex items-center justify-center gap-3 py-4 rounded-2xl bg-yellow-500 text-white font-black hover:bg-yellow-600 transition-all shadow-xl shadow-yellow-100"
         >
-          Sign In to Platform
-          <span aria-hidden="true">←</span>
+          ${primaryLabel}
         </a>
 
         <a
@@ -77,7 +81,6 @@ const renderCheckout = (courseId) => {
         Digital product delivery guaranteed by DEMO e-learning
       </p>
 
-      <!-- soft corner blobs (optional aesthetic) -->
       <div class="absolute -top-10 -left-10 w-28 h-28 bg-yellow-100 rounded-full opacity-60"></div>
       <div class="absolute -bottom-10 -right-10 w-28 h-28 bg-emerald-100 rounded-full opacity-60"></div>
     </div>

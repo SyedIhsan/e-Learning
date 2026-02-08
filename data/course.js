@@ -46,13 +46,13 @@ const createMockContent = (id, title) => {
     {
       id: `${id}-v1`,
       title: `Understanding ${title}`,
-      url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      url: "https://youtu.be/rYQgy8QDEBI?si=iSaoxxd-UaJonLf-",
       description: "Core financial concepts and blockchain overview.",
     },
     {
       id: `${id}-v2`,
       title: `Executing ${title} Strategies`,
-      url: "https://www.youtube.com/embed/SccSCuHhbcM",
+      url: "https://youtu.be/kis7l0y1JUg?si=mWrcBtNyqAdm59sU",
       description: "Live market walk-through and execution steps.",
     },
   ];
@@ -61,7 +61,125 @@ const createMockContent = (id, title) => {
     {
       id: `${id}-e1`,
       title: `The ${title} Blueprint`,
-      content: `<h2>Mastering ${title}</h2><p>Comprehensive strategies for navigating the volatile crypto markets with professional precision.</p>`,
+      content: `
+        <h2>Mastering ${title}</h2>
+        <p>
+          This blueprint is designed as a practical, step-by-step guide to help you build clarity, discipline, and repeatable
+          decision-making in crypto. It focuses on process, risk control, and consistent execution—so you can survive volatility
+          and compound skill over time.
+        </p>
+
+        <h3>1) What You’re Really Learning</h3>
+        <p>
+          Most people think crypto is about “finding the next big coin.” Professionals know it’s about running a system:
+          <strong>risk → entries → exits → review</strong>. You are not paid for being right—you are paid for managing uncertainty.
+        </p>
+        <ul>
+          <li><strong>Risk Management:</strong> staying in the game long enough to win.</li>
+          <li><strong>Market Structure:</strong> understanding trend, range, and volatility regimes.</li>
+          <li><strong>Execution:</strong> entries/exits based on rules, not emotions.</li>
+          <li><strong>Review:</strong> measuring what works and removing what doesn’t.</li>
+        </ul>
+
+        <h3>2) The Core Framework (A Simple Professional System)</h3>
+        <p>
+          Use this framework every time you open a chart. If you skip steps, you increase randomness.
+        </p>
+        <ol>
+          <li><strong>Context:</strong> What market regime is this (trend, range, breakout, mean-revert)?</li>
+          <li><strong>Levels:</strong> Identify support/resistance, liquidity zones, and key swing points.</li>
+          <li><strong>Plan:</strong> Define entry trigger, stop-loss, and take-profit before you trade.</li>
+          <li><strong>Position Size:</strong> Set your size based on risk, not based on excitement.</li>
+          <li><strong>Post-Trade Review:</strong> Log outcome + decision quality (not just profit).</li>
+        </ol>
+
+        <h3>3) Risk Rules That Keep You Alive</h3>
+        <p>
+          If you adopt only one concept from this ebook, adopt this: <strong>your risk is your strategy</strong>.
+          A decent strategy with excellent risk control outperforms a great strategy with reckless sizing.
+        </p>
+        <ul>
+          <li><strong>Risk per trade:</strong> 0.5%–2% of account value (pick one and stay consistent).</li>
+          <li><strong>Max daily loss:</strong> stop trading after 2–3 losing trades or a fixed % drawdown.</li>
+          <li><strong>No revenge trading:</strong> losses are feedback, not an insult.</li>
+          <li><strong>Always use a stop:</strong> a stop is not “being wrong”—it’s the cost of staying solvent.</li>
+        </ul>
+
+        <h3>4) A Beginner-Friendly Trade Plan Template</h3>
+        <p>Copy/paste this into your notes and fill it before every position:</p>
+        <ul>
+          <li><strong>Asset:</strong> </li>
+          <li><strong>Reason (setup):</strong> Trend continuation / Breakout / Range bounce / News catalyst</li>
+          <li><strong>Entry trigger:</strong> e.g., break + retest, candle close above resistance, reclaim a level</li>
+          <li><strong>Invalidation (stop-loss):</strong> the level that proves your idea is wrong</li>
+          <li><strong>Targets:</strong> TP1 / TP2 / runner (if applicable)</li>
+          <li><strong>Risk per trade:</strong> </li>
+          <li><strong>Position size:</strong> </li>
+          <li><strong>Notes:</strong> what would make you NOT take this trade?</li>
+        </ul>
+
+        <h3>5) Market Psychology (Why Most People Lose)</h3>
+        <p>
+          Crypto punishes impulsive behavior. Your brain is wired to chase and to avoid pain—both are expensive in trading.
+          The goal is not to “control emotions,” it’s to <strong>remove decision-making pressure</strong> with rules.
+        </p>
+        <ul>
+          <li><strong>FOMO:</strong> chasing green candles after the move is mostly done.</li>
+          <li><strong>Panic selling:</strong> selling red candles at the worst possible time.</li>
+          <li><strong>Overtrading:</strong> trading because you are bored, not because the setup exists.</li>
+          <li><strong>Confirmation bias:</strong> only reading opinions that match your position.</li>
+        </ul>
+
+        <h3>6) Mini Case Study: A Simple Breakout Plan</h3>
+        <p>
+          Imagine price has been consolidating in a tight range for days. Volume is decreasing. This often sets up a breakout.
+          Here’s a basic plan:
+        </p>
+        <ol>
+          <li>Mark the range high and range low.</li>
+          <li>Wait for a clean breakout candle close above range high.</li>
+          <li>Wait for a retest of the breakout level.</li>
+          <li>Enter on confirmation (e.g., higher low + reclaim).</li>
+          <li>Stop below the retest low (invalidation).</li>
+          <li>Targets: next resistance zone(s) + partials along the way.</li>
+        </ol>
+        <p>
+          This is not magic. It’s a repeatable process. Your edge comes from executing the plan the same way across many attempts.
+        </p>
+
+        <h3>7) Common Mistakes Checklist</h3>
+        <p>Before you place an order, verify you are not doing any of the following:</p>
+        <ul>
+          <li>Entering without a defined stop-loss.</li>
+          <li>Increasing size because the last trade was a loser.</li>
+          <li>Trading a setup you can’t explain in one sentence.</li>
+          <li>Taking a trade just because someone tweeted it.</li>
+          <li>Holding a loser and hoping it “comes back.”</li>
+        </ul>
+
+        <h3>8) Glossary (Quick Reference)</h3>
+        <ul>
+          <li><strong>Support/Resistance:</strong> zones where price historically reacts.</li>
+          <li><strong>Liquidity:</strong> areas where many stops/orders sit (often around highs/lows).</li>
+          <li><strong>Breakout:</strong> price leaving a range with momentum.</li>
+          <li><strong>Retest:</strong> price revisiting a broken level before continuing.</li>
+          <li><strong>Invalidation:</strong> the condition that proves your trade idea is wrong.</li>
+        </ul>
+
+        <h3>9) Quick Quiz (Self-Check)</h3>
+        <ol>
+          <li>What is the single most important job of risk management?</li>
+          <li>What should be defined before you enter a trade?</li>
+          <li>Why is “being right” less important than having a process?</li>
+          <li>What is an invalidation level?</li>
+        </ol>
+
+        <h3>10) Next Steps</h3>
+        <p>
+          The next module will convert this blueprint into a repeatable workflow: identifying setups, calculating risk,
+          and executing with discipline. Keep your focus on process—not on fast results.
+        </p>
+      `,
     },
   ];
 
