@@ -1,7 +1,7 @@
 // instructors.js
 // Rendered via route.js at #/instructors
 
-const INSTRUCTORS = [
+export const INSTRUCTORS = [
   {
     name: "Marcus Thorne",
     role: "Lead Macro Strategist",

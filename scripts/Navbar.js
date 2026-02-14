@@ -47,7 +47,7 @@ const renderNavbar = () => {
           </div>`
             : `
           <a href="#/signin" class="hidden sm:block text-sm font-semibold text-slate-700 hover:text-yellow-500">Sign In</a>
-          <a href="#/beginner" class="bg-yellow-500 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-md shadow-yellow-200 hover:bg-yellow-600 transition-all">Browse Courses</a>
+          <a href="admin/login.html" class="bg-yellow-500 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-md shadow-yellow-200 hover:bg-yellow-600 transition-all">Admin Portal</a>
           `
         }
 

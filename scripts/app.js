@@ -557,7 +557,7 @@ import {
 
       const email = (STATE.signIn.email || "").trim();
       const pw = (STATE.signIn.password || "").trim();
-      if (!email || !pw) { STATE.signIn.error = "Isi email & password."; render(); return; }
+      if (!email || !pw) { STATE.signIn.error = "Please enter your email and password."; render(); return; }
 
       const userId = email.toLowerCase();
       const purchased = JSON.parse(localStorage.getItem("sdc_purchased") || "[]");
