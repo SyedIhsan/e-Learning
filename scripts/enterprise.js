@@ -65,9 +65,9 @@ const renderEnterprise = () => {
       <section class="py-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid lg:grid-cols-3 gap-10">
           ${SOLUTIONS.map((sol) => `
-            <div class="group p-10 bg-white/5 rounded-[3rem] border border-white/10 hover:border-indigo-500/50 hover:bg-white/[0.07] transition-all flex flex-col">
+            <div class="group p-10 bg-white/5 rounded-[3rem] border border-white/10 hover:border-yellow-500/50 hover:bg-white/[0.07] transition-all flex flex-col">
               <div class="text-5xl mb-8">${sol.icon}</div>
-              <h3 class="text-2xl font-black mb-6 group-hover:text-indigo-400 transition-colors">${sol.title}</h3>
+              <h3 class="text-2xl font-black mb-6 group-hover:text-yellow-400 transition-colors">${sol.title}</h3>
               <p class="text-slate-400 mb-10 font-medium leading-relaxed flex-grow">
                 ${sol.desc}
               </p>
@@ -114,7 +114,7 @@ const renderEnterprise = () => {
             </div>
 
             <div class="lg:w-1/2 relative">
-              <div class="absolute inset-0 bg-indigo-600/10 blur-[80px] rounded-full"></div>
+              <div class="absolute inset-0 bg-yellow-500/10 blur-[80px] rounded-full"></div>
               <img
                 src="https://miro.medium.com/v2/resize:fit:1400/1*rQ3d_dKG7V2JhX8SrUjs6g.png"
                 class="relative rounded-[3rem] shadow-2xl shadow-slate-300 border border-slate-200"
@@ -139,20 +139,20 @@ const renderEnterprise = () => {
           <form class="grid md:grid-cols-2 gap-8" autocomplete="on">
             <div class="space-y-2">
               <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Company Name</label>
-              <input type="text" class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Capital Mgmt LLC" />
+              <input type="text" class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-yellow-500 outline-none" placeholder="Capital Mgmt LLC" />
             </div>
 
             <div class="space-y-2">
               <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Expected Seats</label>
-              <input type="text" class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="10 - 50" />
+              <input type="text" class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-yellow-500 outline-none" placeholder="10 - 50" />
             </div>
 
             <div class="md:col-span-2 space-y-2">
               <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Team Goal</label>
-              <textarea class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none h-32" placeholder="Tell us about your team's specific objectives..."></textarea>
+              <textarea class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-yellow-500 outline-none h-32" placeholder="Tell us about your team's specific objectives..."></textarea>
             </div>
 
-            <button type="button" class="md:col-span-2 py-5 bg-white text-slate-950 font-black rounded-2xl hover:bg-indigo-400 transition-all text-lg">
+            <button type="button" class="md:col-span-2 py-5 bg-white text-slate-950 font-black rounded-2xl hover:bg-slate-100 transition-all text-lg">
               Initialize Consultation
             </button>
           </form>

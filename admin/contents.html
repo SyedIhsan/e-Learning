@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Content</title>
+  <link href="../img/elearning.png" rel="icon">
+  <script src="https://cdn.tailwindcss.com?plugins=typography,line-clamp,aspect-ratio"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/admin.css" />
+  <script defer src="./assets/admin.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased overflow-x-hidden"
+      style="font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;"
+      data-page="content" data-requires-auth="1">
+<!-- Admin layout shell (Sidebar Left) -->
+<div class="min-h-screen flex">
+
+  <!-- Desktop Sidebar -->
+  <aside class="hidden md:flex w-72 shrink-0 flex-col bg-white border-r border-slate-200 sticky top-0 h-screen">
+    <div class="px-6 py-6 border-b border-slate-100">
+      <a href="dashboard.html" class="flex items-center gap-3">
+        <div class="h-10 w-10 bg-yellow-500 rounded-lg shrink-0 flex items-center justify-center">
+            <svg class="h-8 w-8 object-contain" xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 512 512"><path fill="#ffffff" d="M256 89.61L22.486 177.18L256 293.937l111.22-55.61l-104.337-31.9A16 16 0 0 1 256 208a16 16 0 0 1-16-16a16 16 0 0 1 16-16l-2.646 8.602l18.537 5.703a16 16 0 0 1 .008.056l27.354 8.365L455 246.645v12.146a16 16 0 0 0-7 13.21a16 16 0 0 0 7.293 13.406C448.01 312.932 448 375.383 448 400c16 10.395 16 10.775 32 0c0-24.614-.008-87.053-7.29-114.584A16 16 0 0 0 480 272a16 16 0 0 0-7-13.227v-25.42L413.676 215.1l75.838-37.92L256 89.61zM119.623 249L106.5 327.74c26.175 3.423 57.486 18.637 86.27 36.627c16.37 10.232 31.703 21.463 44.156 32.36c7.612 6.66 13.977 13.05 19.074 19.337c5.097-6.288 11.462-12.677 19.074-19.337c12.453-10.897 27.785-22.128 44.156-32.36c28.784-17.99 60.095-33.204 86.27-36.627L392.375 249h-6.25L256 314.063L125.873 249h-6.25z"/></svg>
+          </div>
+        <div>
+          <div class="text-sm font-black text-slate-900 leading-4">Admin Panel</div>
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Control Center</div>
+        </div>
+      </a>
+    </div>
+
+    <div class="px-4 py-5 flex-1 overflow-y-auto">
+      <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3 mb-3">Navigation</div>
+      <div class="space-y-2">
+        <a data-nav="dashboard" href="dashboard.html" class="group flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-extrabold transition text-slate-700 hover:bg-slate-50 hover:text-slate-900 border border-transparent">
+          <span class="text-slate-400 group-hover:text-slate-600">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 11l9-8 9 8v10a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-4a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V11z"/></svg>
+          </span>
+          <span class="tracking-tight">Dashboard</span>
+        </a>
+
+        <a data-nav="courses" href="courses.html" class="group flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-extrabold transition text-slate-700 hover:bg-slate-50 hover:text-slate-900 border border-transparent">
+          <span class="text-slate-400 group-hover:text-slate-600">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6l-8 4 8 4 8-4-8-4z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10v6l8 4 8-4v-6"/></svg>
+          </span>
+          <span class="tracking-tight">Courses</span>
+        </a>
+
+        <a data-nav="content" href="contents.html" class="group flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-extrabold transition text-slate-700 hover:bg-slate-50 hover:text-slate-900 border border-transparent">
+          <span class="text-slate-400 group-hover:text-slate-600">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h10"/></svg>
+          </span>
+          <span class="tracking-tight">Content</span>
+        </a>
+
+        <a data-nav="progress" href="progress.html" class="group flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-extrabold transition text-slate-700 hover:bg-slate-50 hover:text-slate-900 border border-transparent">
+          <span class="text-slate-400 group-hover:text-slate-600">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 14l3-3 3 2 5-6"/></svg>
+          </span>
+          <span class="tracking-tight">Student Progress</span>
+        </a>
+
+        <a data-nav="google" href="google.html" class="group flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-extrabold transition text-slate-700 hover:bg-slate-50 hover:text-slate-900 border border-transparent">
+          <span class="text-slate-400 group-hover:text-slate-600">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h8"/></svg>
+          </span>
+          <span class="tracking-tight">Google</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="p-4 border-t border-slate-100">
+      <div class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3">Signed in as <span id="adminUser" class="text-slate-600">admin</span></div>
+
+      <a data-action="open-student-site"
+        href="../index.html"
+        class="block w-full text-center px-4 py-3 rounded-2xl bg-slate-900 text-white font-black text-sm hover:bg-slate-800 transition">
+        Open Student Site
+      </a>
+      <a href="logout.html" class="mt-3 block w-full text-center px-4 py-3 rounded-2xl bg-white border border-slate-200 text-slate-600 font-black text-sm hover:border-red-200 hover:text-red-600 hover:bg-red-50 transition">
+        Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Mobile Top Bar + Drawer -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <div class="md:hidden sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
+      <div class="h-16 px-4 flex items-center justify-between">
+        <button type="button" onclick="window.__sdcToggleAdminDrawer?.()" class="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-white border border-slate-200 text-slate-700">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <a href="dashboard.html" class="font-black text-slate-900">DEMO Admin</a>
+        <a href="logout.html" class="text-sm font-black text-slate-500 hover:text-red-600">Logout</a>
+      </div>
+    </div>
+
+    <div id="adminDrawer" class="md:hidden fixed inset-0 z-[60] hidden">
+      <div class="absolute inset-0 bg-black/40" onclick="window.__sdcCloseAdminDrawer?.()"></div>
+      <aside class="absolute left-0 top-0 h-full w-72 bg-white border-r border-slate-200 flex flex-col">
+        <div class="px-6 py-6 border-b border-slate-100 flex items-center justify-between">
+          <a href="dashboard.html" class="flex items-center gap-3">
+            <div class="h-10 w-10 bg-yellow-500 rounded-lg shrink-0 flex items-center justify-center">
+            <svg class="h-8 w-8 object-contain" xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 512 512"><path fill="#ffffff" d="M256 89.61L22.486 177.18L256 293.937l111.22-55.61l-104.337-31.9A16 16 0 0 1 256 208a16 16 0 0 1-16-16a16 16 0 0 1 16-16l-2.646 8.602l18.537 5.703a16 16 0 0 1 .008.056l27.354 8.365L455 246.645v12.146a16 16 0 0 0-7 13.21a16 16 0 0 0 7.293 13.406C448.01 312.932 448 375.383 448 400c16 10.395 16 10.775 32 0c0-24.614-.008-87.053-7.29-114.584A16 16 0 0 0 480 272a16 16 0 0 0-7-13.227v-25.42L413.676 215.1l75.838-37.92L256 89.61zM119.623 249L106.5 327.74c26.175 3.423 57.486 18.637 86.27 36.627c16.37 10.232 31.703 21.463 44.156 32.36c7.612 6.66 13.977 13.05 19.074 19.337c5.097-6.288 11.462-12.677 19.074-19.337c12.453-10.897 27.785-22.128 44.156-32.36c28.784-17.99 60.095-33.204 86.27-36.627L392.375 249h-6.25L256 314.063L125.873 249h-6.25z"/></svg>
+          </div>
+            <div class="font-black text-slate-900">Admin Panel</div>
+          </a>
+          <button type="button" onclick="window.__sdcCloseAdminDrawer?.()" class="w-10 h-10 rounded-2xl border border-slate-200 text-slate-700">
+            <svg class="w-5 h-5 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="px-4 py-5 flex-1 overflow-y-auto">
+          <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3 mb-3">Navigation</div>
+          <div class="space-y-2">
+            <a data-nav="dashboard" href="dashboard.html" class="group flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-extrabold transition text-slate-700 hover:bg-slate-50 hover:text-slate-900 border border-transparent">Dashboard</a>
+            <a data-nav="courses" href="courses.html" class="group flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-extrabold transition text-slate-700 hover:bg-slate-50 hover:text-slate-900 border border-transparent">Courses</a>
+            <a data-nav="content" href="contents.html" class="group flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-extrabold transition text-slate-700 hover:bg-slate-50 hover:text-slate-900 border border-transparent">Content</a>
+            <a data-nav="progress" href="progress.html" class="group flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-extrabold transition text-slate-700 hover:bg-slate-50 hover:text-slate-900 border border-transparent">Student Progress</a>
+            <a data-nav="google" href="google.html" class="group flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-extrabold transition text-slate-700 hover:bg-slate-50 hover:text-slate-900 border border-transparent">Google</a>
+          </div>
+        </div>
+        <div class="p-4 border-t border-slate-100">
+          <a data-action="open-student-site"
+            href="../index.html"
+            class="block w-full text-center px-4 py-3 rounded-2xl bg-slate-900 text-white font-black text-sm hover:bg-slate-800 transition">
+            Open Student Site
+          </a>
+          <a href="logout.html" class="mt-3 block w-full text-center px-4 py-3 rounded-2xl bg-white border border-slate-200 text-slate-600 font-black text-sm hover:text-red-600">Logout</a>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 px-4 sm:px-6 lg:px-8 py-10">
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+  <header class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div>
+      <h1 class="text-4xl font-black text-slate-900 mb-2">Manage Content</h1>
+      <p class="text-slate-500 font-medium">Add / delete videos, ebooks, and workbooks for a specific course (static demo).</p>
+    </div>
+    <a href="courses.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white border border-slate-200 text-slate-700 font-bold hover:bg-slate-50 transition">
+      ← Back to Courses
+    </a>
+  </header>
+
+  <!-- Select Course -->
+  <div class="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/40 p-6 mb-8">
+    <form method="GET" action="contents.html" class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+      <div id="courseSelectWrap" class="relative flex-1">
+        <!-- keep real select for GET submit -->
+        <select id="courseSelect" name="course_id" class="hidden">
+          <option value="">Select a course</option>
+        </select>
+
+        <!-- fake select button -->
+        <button
+          type="button"
+          id="courseSelectBtn"
+          class="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl flex items-center justify-between gap-3 font-black text-slate-900 hover:bg-slate-50 transition"
+        >
+          <span id="courseSelectLabel" class="truncate">Select a course</span>
+          <svg class="w-5 h-5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+
+        <!-- dropdown -->
+        <div
+          id="courseSelectDropdown"
+          class="hidden absolute left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl shadow-slate-200/40 overflow-hidden z-50"
+        >
+          <div class="p-3 border-b border-slate-100">
+            <input
+              id="courseSelectSearch"
+              placeholder="Search course..."
+              class="w-full px-4 py-3 bg-white border border-yellow-400 rounded-2xl outline-none focus:ring-2 focus:ring-yellow-400"
+            >
+          </div>
+          <div id="courseSelectOptions" class="max-h-80 overflow-auto"></div>
+        </div>
+      </div>
+
+      <button class="px-6 py-3 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition">
+        Load
+      </button>
+    </form>
+  </div>
+
+  <!-- Pick a course (same style) -->
+  <div id="pickCourseEmpty" class="bg-white rounded-[3rem] p-16 text-center border border-dashed border-slate-200">
+    <h2 class="text-2xl font-bold text-slate-900 mb-2">Pick a course</h2>
+    <p class="text-slate-500">After selecting, you can add video/ebook/workbook.</p>
+  </div>
+
+  <!-- Loaded course panel -->
+  <div id="coursePanel" class="hidden">
+
+    <div class="bg-slate-900 rounded-[3rem] p-10 text-white mb-10 relative overflow-hidden">
+      <div class="relative z-10">
+        <div id="courseMeta" class="text-xs font-black uppercase tracking-widest text-slate-300 mb-2">—</div>
+        <h2 id="courseTitle" class="text-2xl md:text-3xl font-black">—</h2>
+        <p class="text-slate-300 mt-2">Student UI will reflect this content when you migrate fetch later.</p>
+      </div>
+      <div class="absolute top-0 right-0 w-64 h-64 bg-yellow-500/10 rounded-full blur-[80px] -mr-32 -mt-32"></div>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-8 min-w-0">
+
+      <!-- Add forms -->
+      <div class="lg:col-span-1 space-y-8 min-w-0">
+
+        <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 p-8">
+          <h3 class="text-lg font-black mb-4">Add Video</h3>
+          <form id="videoForm" class="space-y-3">
+            <input type="hidden" id="courseIdVideo" value="">
+            <input id="v_title" placeholder="Video title" class="w-full min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
+            <input id="v_url" placeholder="YouTube embed URL (https://www.youtube.com/embed/...)" class="w-full min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
+            <textarea id="v_desc" rows="3" placeholder="Optional description" class="w-full min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl"></textarea>
+            <button class="w-full py-3 bg-yellow-500 text-white font-bold rounded-2xl hover:bg-yellow-600 transition">Add Video</button>
+          </form>
+        </div>
+
+        <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 p-8">
+          <h3 class="text-lg font-black mb-4">Add Ebook</h3>
+          <form id="ebookForm" class="space-y-3">
+            <input type="hidden" id="courseIdEbook" value="">
+            <input id="e_title" placeholder="Ebook title" class="w-full min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
+            <textarea id="e_content" rows="8" placeholder="HTML content (e.g. <h2>Title</h2><p>...</p>)" class="w-full min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-sm"></textarea>
+            <button class="w-full py-3 bg-yellow-500 text-white font-bold rounded-2xl hover:bg-yellow-600 transition">Add Ebook</button>
+          </form>
+          <p class="text-xs text-slate-400 mt-3">Student page renders ebook content as HTML (same pattern as current data).</p>
+        </div>
+
+        <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 p-8">
+          <h3 class="text-lg font-black mb-4">Add Workbook</h3>
+          <form id="workbookForm" class="space-y-3">
+            <input type="hidden" id="courseIdWorkbook" value="">
+            <input id="w_id" placeholder="Workbook ID (e.g. beg-101-1)" class="w-full min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
+            <input id="w_title" placeholder="Workbook title" class="w-full min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
+            <input id="w_url" placeholder="Google Sheet share URL / embed URL" class="w-full min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
+            <button class="w-full py-3 bg-yellow-500 text-white font-bold rounded-2xl hover:bg-yellow-600 transition">Add Workbook</button>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- Lists -->
+      <div class="lg:col-span-2 space-y-8 min-w-0">
+
+        <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 p-8">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-black">Videos</h3>
+            <span class="text-xs font-black text-slate-400 uppercase tracking-widest"><span id="videosCount">0</span> items</span>
+          </div>
+          <p id="videosEmpty" class="text-slate-500 hidden">No videos yet.</p>
+          <div id="videosList" class="space-y-4"></div>
+        </div>
+
+        <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 p-8">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-black">Ebooks</h3>
+            <span class="text-xs font-black text-slate-400 uppercase tracking-widest"><span id="ebooksCount">0</span> items</span>
+          </div>
+          <p id="ebooksEmpty" class="text-slate-500 hidden">No ebooks yet.</p>
+          <div id="ebooksList" class="space-y-4"></div>
+        </div>
+
+        <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 p-8">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-black">Workbooks</h3>
+            <span class="text-xs font-black text-slate-400 uppercase tracking-widest"><span id="workbooksCount">0</span> items</span>
+          </div>
+          <p id="workbooksEmpty" class="text-slate-500 hidden">No workbooks yet.</p>
+          <div id="workbooksList" class="space-y-4"></div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script type="module" src="scripts/contents.js"></script>
+
+    </main>
+
+    <footer class="px-4 sm:px-6 lg:px-8 py-10 text-center text-xs text-slate-400">
+      © <span id="year"></span> DEMO Admin.
+    </footer>
+  </div>
+</div>
+
+</body>
+</html>
