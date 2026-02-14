@@ -117,12 +117,22 @@ const renderCoursePage = (level) => {
   const coursesForLevel = COURSES_DATA.filter((c) => c.level.toLowerCase() === level);
   const wait = ensureWaitlistState(level);
 
+  const levelKey = String(level || "").toLowerCase();
+
+  const heroDescMap = {
+    beginner:
+      "Start with crypto essentials such as wallets, exchanges, basic security, and your first buy and sell, step by step.",
+    intermediate:
+      "Build stronger skills with strategy, chart fundamentals, and risk management using real market examples.",
+    advanced:
+      "Go deeper with advanced setups, DeFi tools, and portfolio systems for more confident execution."
+  };
+
   const heroDesc =
     coursesForLevel.length > 0
-      ? `Expert-curated curriculum designed to take you from absolute zero to job-ready expertise in ${escapeHtml(
-          level
-        )} concepts.`
-      : `Our specialized ${escapeHtml(level)} curriculum is currently under development by industry experts.`;
+      ? (heroDescMap[levelKey] ||
+        `A structured crypto learning path built from the courses below.`)
+      : `The ${escapeHtml(level)} track is being updated for this demo. Check back soon for new modules.`;
 
   return `
 <div class="bg-slate-50 min-h-screen pb-24">
